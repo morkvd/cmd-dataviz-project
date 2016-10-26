@@ -35,7 +35,7 @@ d3.csv('data/data.csv', function (data) {
 
   const coolAssScale = d3.scaleLinear()
                         .domain([meanAmount + standardDeviation, d3.max(data.map((transaction) => +transaction.amount))])
-                        .range([0, 20])
+                        .rangeRound([0, 20])
                         .clamp(true)
 
   console.log(standardDeviation);
@@ -43,9 +43,12 @@ d3.csv('data/data.csv', function (data) {
 
   // if the value is 0 ALARM
   // if the value has more than two numbers after the comma HALP
-  // else use scale 
+  // else use scale
 
-  function givePoints (transaction) {
+  function handleTransactionAmount (transaction) {
+    if (transaction.amount == '0') {
+
+    }
     return Object.assign(
       {
         score: transaction.amount == '0' ? 20 : coolAssScale(transaction.amount),
@@ -54,6 +57,6 @@ d3.csv('data/data.csv', function (data) {
     );
   }
 
-  console.table(data.map(givePoints))
+  console.table(data.map(handleTransactionAmount))
 
 });
