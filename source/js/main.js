@@ -8,7 +8,7 @@ function preProcess(transaction) {
   );
 }
 
-d3.csv('data/data.csv', preProcess, function (fraudData) {
+d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   /* Program layout
 
