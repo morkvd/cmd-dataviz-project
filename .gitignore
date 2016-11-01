@@ -1,3 +1,6 @@
+# Build results (css only for now)
+assets/css/
+
 # Logs
 logs
 *.log
