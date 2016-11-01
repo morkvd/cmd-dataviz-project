@@ -41,46 +41,52 @@ d3.csv('data/data.csv', preProcess, function (fraudData) {
 
   // Calculate standardDeviation: (http://www.mathsisfun.com/data/standard-deviation.html)
 
-  const transactionAmounts = fraudData.map((transaction) => transaction.amount);
+  function calculateStandardDeviation(data) {
 
-  function mean(arr) {
-    return arr.reduce((a, b) => a + b) / arr.length
+    // calculate mean of given array
+    function calculateMean(arr) {
+      return arr.reduce((a, b) => a + b, 0) / arr.length;
+    }
+
+    // calculate variance of given array
+    // (variance == average of squared difference between value and mean,
+    //  where the values are the items in the array)
+    function calculateVariance(arr) {
+      let arrMean = calculateMean(arr);
+      return arr.map(a => Math.pow(a - arrMean, 2)).reduce((a, b) => a + b) / arr.length;
+    }
+
+    // get the amounts from the dataset
+    const transactionAmounts = data.map((transaction) => transaction.amount);
+    // caculate the mean from this amount
+    const mean = calculateMean(transactionAmounts);
+    // calculate the standardDeviation
+    const standardDeviation = Math.sqrt(calculateVariance(transactionAmounts))
+
+    function calculateDeviation(transaction) {
+      const differenceInPercentage = (transaction.amount / mean) * 100;
+      const standardDeviationUpper = mean + standardDeviation;
+      const standardDeviationLower = mean - standardDeviation;
+      return {
+        isLargerThanStandardDeviation: transaction.amount > standardDeviationUpper,
+        isSmallerThanStandardDeviation: transaction.amount < standardDeviationLower,
+        differenceInPercentage: differenceInPercentage,
+      };
+    }
+
+    function addStandardDeviation(transaction) {
+      return Object.assign({},
+        calculateDeviation(transaction),
+        transaction
+      );
+    }
+
+    return data.map(addStandardDeviation);
   }
 
-  function variance(arr) {
-    let arrMean = mean(arr);
-    return arr.map(a => Math.pow(a - arrMean, 2)).reduce((a, b) => a + b) / arr.length;
-  }
+  console.table(calculateStandardDeviation(fraudData));
 
-  const transactionAmountsMean = mean(transactionAmounts);
-  const transactionAmountsVariance = variance(transactionAmounts)
-  const transactionAmountsStandardDeviation = Math.sqrt(transactionAmountsVariance)
-
-  console.log('mean');
-  console.log(transactionAmountsMean);
-  console.log('variance');
-  console.log(transactionAmountsVariance);
-  console.log('standardDeviation');
-  console.log(transactionAmountsStandardDeviation);
-
-  function calculateDeviation (transaction) {
-    const deviation = (transaction.amount / transactionAmountsMean) * 100;
-    const differenceFromMean = transaction.amount - transactionAmountsMean;
-    return {
-      sd: transaction.amount / transactionAmountsStandardDeviation,
-      deviation: deviation,
-      differenceFromMean: differenceFromMean,
-    };
-  }
-
-  function addCalculatedFraudIndicators (transaction) {
-    return Object.assign({},
-      calculateDeviation (transaction),
-      transaction
-    );
-  }
-
-  console.table(fraudData.map(addCalculatedFraudIndicators))
+  //console.table(fraudData.map(addCalculatedFraudIndicators))
 
   /* Fraud check 2 'Shopper email or card number is used in quick succession' */
 
@@ -97,25 +103,8 @@ d3.csv('data/data.csv', preProcess, function (fraudData) {
   /* Add fraud info to transaction */
 
   /* Calculate Points */
-  const maxTransactionAmount = d3.max(fraudData.map((transaction) => transaction.amount))
-
-  const processedData = fraudData.map(addCalculatedFraudIndicators)
-
-  const varianceSum = processedData.map((transaction) => Math.pow(transaction.differenceFromMean, 2))
-                                   .reduce((previousVal, currentVal) => previousVal + currentVal);
-
-  const standardDeviation = Math.sqrt(varianceSum / processedData.length);
-
-  const scaleFraudCheck1 = d3.scaleLinear()
-                             .domain([transactionAmountsMean + standardDeviation, maxTransactionAmount])
-                             .rangeRound([0, 20])
-                             .clamp(true);
 
   /* Statistics over whole dataset */
-
-
-  console.log(standardDeviation);
-  console.log(transactionAmountsMean);
 
   /* Draw chart */
 
