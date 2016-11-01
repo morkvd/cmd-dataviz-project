@@ -56,14 +56,14 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
       return arr.map(a => Math.pow(a - arrMean, 2)).reduce((a, b) => a + b) / arr.length;
     }
 
-    // get the amounts from the dataset
-    const transactionAmounts = data.map((transaction) => transaction.amount);
-    // caculate the mean from this amount
-    const mean = calculateMean(transactionAmounts);
-    // calculate the standardDeviation
-    const standardDeviation = Math.sqrt(calculateVariance(transactionAmounts))
-
     function calculateDeviation(transaction) {
+      // get the amounts from the dataset
+      const transactionAmounts = data.map((transaction) => transaction.amount);
+      // caculate the mean from this amount
+      const mean = calculateMean(transactionAmounts);
+      // calculate the standardDeviation
+      const standardDeviation = Math.sqrt(calculateVariance(transactionAmounts))
+      
       const differenceInPercentage = (transaction.amount / mean) * 100;
       const standardDeviationUpper = mean + standardDeviation;
       const standardDeviationLower = mean - standardDeviation;
