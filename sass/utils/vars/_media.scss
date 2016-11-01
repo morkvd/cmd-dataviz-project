@@ -1,0 +1,35 @@
+//    Media queries
+//
+//    example usage:
+//    -------------
+//
+//    @media #{ $ screen-small-and-down } {
+//        .some-class {
+//            font-size: 1.4rem;
+//        }
+//    }
+
+
+// Breakpoints
+
+$breakpoint-small           : 480px;
+$breakpoint-medium          : 768px;
+$breakpoint-large           : 1024px;
+$breakpoint-extra-large     : 1200px;
+
+
+// Media queries
+
+$screen-small-only          : "only screen and ( min-width : #{$breakpoint-small} ) and ( max-width : #{$breakpoint-medium - 1} )";
+$screen-small-and-down      : "only screen and ( max-width : #{$breakpoint-medium - 1} )";
+$screen-small-and-up        : "only screen and ( min-width : #{$breakpoint-small} )";
+
+$screen-medium-only         : "only screen and ( min-width : #{$breakpoint-medium} ) and ( max-width : #{$breakpoint-large - 1} )";
+$screen-medium-and-down     : "only screen and ( max-width : #{$breakpoint-large - 1} )";
+$screen-medium-and-up       : "only screen and ( min-width : #{$breakpoint-medium} )";
+
+$screen-large-only          : "only screen and ( min-width : #{$breakpoint-large} ) and ( max-width : #{$breakpoint-extra-large - 1} )";
+$screen-large-and-down      : "only screen and ( max-width : #{$breakpoint-extra-large - 1} )";
+$screen-large-and-up        : "only screen and ( min-width : #{$breakpoint-large} )";
+
+$screen-extra-large-and-up  : "only screen and ( min-width : #{$breakpoint-extra-large} )";

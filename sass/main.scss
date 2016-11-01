@@ -1,4 +1,20 @@
-header {
-  background: #fff;
-  color: #000;
-}
+@charset "UTF-8";
+
+// Core
+
+@import "utils/vars/index";
+@import "utils/index";
+
+@import "layout/normalize";
+@import "layout/html";
+
+
+// Elements
+
+@import "elements/button";
+
+
+// Modules
+
+@import "modules/footer";
+@import "modules/header";
