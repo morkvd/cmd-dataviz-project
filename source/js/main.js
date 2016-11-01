@@ -67,7 +67,7 @@ d3.csv('data/data.csv', preProcess, function (fraudData) {
     const deviation = (transaction.amount / transactionAmountsMean) * 100;
     const differenceFromMean = transaction.amount - transactionAmountsMean;
     return {
-      sd: transaction.amount % transactionAmountsStandardDeviation,
+      sd: transaction.amount / transactionAmountsStandardDeviation,
       deviation: deviation,
       differenceFromMean: differenceFromMean,
     };
@@ -107,7 +107,7 @@ d3.csv('data/data.csv', preProcess, function (fraudData) {
   const standardDeviation = Math.sqrt(varianceSum / processedData.length);
 
   const scaleFraudCheck1 = d3.scaleLinear()
-                             .domain([amountMean + standardDeviation, maxTransactionAmount])
+                             .domain([transactionAmountsMean + standardDeviation, maxTransactionAmount])
                              .rangeRound([0, 20])
                              .clamp(true);
 
@@ -115,7 +115,7 @@ d3.csv('data/data.csv', preProcess, function (fraudData) {
 
 
   console.log(standardDeviation);
-  console.log(amountMean);
+  console.log(transactionAmountsMean);
 
   /* Draw chart */
 
