@@ -43,12 +43,12 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   function calculateStandardDeviation(data) {
 
-    // calculate mean of given array
+    // calculate mean of given array of numbers
     function calculateMean(arr) {
       return arr.reduce((a, b) => a + b, 0) / arr.length;
     }
 
-    // calculate variance of given array
+    // calculate variance of given array of numbers
     // (variance == average of squared difference between value and mean,
     //  where the values are the items in the array)
     function calculateVariance(arr) {
@@ -63,25 +63,22 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
       const mean = calculateMean(transactionAmounts);
       // calculate the standardDeviation
       const standardDeviation = Math.sqrt(calculateVariance(transactionAmounts))
-      
-      const differenceInPercentage = (transaction.amount / mean) * 100;
+
       const standardDeviationUpper = mean + standardDeviation;
       const standardDeviationLower = mean - standardDeviation;
       return {
-        isLargerThanStandardDeviation: transaction.amount > standardDeviationUpper,
+        isLargerThanStandardDeviation:  transaction.amount > standardDeviationUpper,
         isSmallerThanStandardDeviation: transaction.amount < standardDeviationLower,
-        differenceInPercentage: differenceInPercentage,
+        differenceInPercentage:         (transaction.amount / mean) * 100,
       };
     }
 
-    function addStandardDeviation(transaction) {
+    return data.map(function(transaction) {
       return Object.assign({},
         calculateDeviation(transaction),
         transaction
       );
-    }
-
-    return data.map(addStandardDeviation);
+    });
   }
 
   console.table(calculateStandardDeviation(fraudData));
@@ -107,7 +104,5 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   /* Statistics over whole dataset */
 
   /* Draw chart */
-
-
 
 });
