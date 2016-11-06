@@ -32,8 +32,9 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
     5. Shopper country differs from issuing country and/or country of currency
     6. Card number already used by other shopper (shopper email)
     7. Transaction time check
-
   */
+
+
 
 
   /* precalculation for check 1 */
@@ -105,6 +106,17 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   /* Fraud check 7 'Transaction time check' */
 
   /* Add aditional fraud info to transaction */
+  function nestBy(data, field) {
+    return d3.nest()
+             .key(function(d)  { return d[field]; })
+             .entries(data);
+  }
+
+  const NESTED_BY_EMAIL = nestBy(fraudData, 'email_id');
+  console.table(NESTED_BY_EMAIL);
+  const NESTED_BY_CARDID = nestBy(fraudData, 'card_id');
+  console.table(NESTED_BY_CARDID);
+
   function addCalculatedFraudIndicators(data) {
     return data.map(function(transaction) {
       return Object.assign({},
@@ -127,8 +139,8 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
     });
   }
 
-  const FINISHED_DATA = givePoints(ENHANCED_DATA);
-  console.table(FINISHED_DATA);
+  //const FINISHED_DATA = givePoints(ENHANCED_DATA);
+  //console.table(FINISHED_DATA);
 
   /* Draw chart */
 
