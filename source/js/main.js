@@ -37,7 +37,6 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
 
   /* precalculation for check 1 */
-
   function calculateMean(arr) {
     return arr.reduce((a, b) => a + b, 0) / arr.length;
   }
@@ -50,16 +49,13 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   // Get the amounts from the dataset
   const TRANSACTION_AMOUNTS = fraudData.map((transaction) => transaction.amount);
 
-  // Caculate the mean from this amount
   const MEAN = calculateMean(TRANSACTION_AMOUNTS);
 
   // Calculate standardDeviation: (http://www.mathsisfun.com/data/standard-deviation.html)
   const STANDARDDEVIATION = Math.sqrt(calculateVariance(TRANSACTION_AMOUNTS));
 
-  // Max
   const TRANSACTION_MAX = d3.max(TRANSACTION_AMOUNTS);
 
-  //
   function addDeviation(transaction) {
     return {
       isAboveStandardDeviation: transaction.amount > (MEAN + STANDARDDEVIATION),
@@ -77,12 +73,12 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   function checkOne(transaction) {
     const scale = d3.scaleLinear()
                     .domain([MEAN + STANDARDDEVIATION, TRANSACTION_MAX])
-                    .range([0, 25])
+                    .rangeRound([0, 25])
                     .clamp(true);
 
     let points = 0;
     let hasMoreThanTwoDecimalPlaces = false;
-    
+
     if (transaction.amount.toString().indexOf('.') !== -1) {
       hasMoreThanTwoDecimalPlaces = transaction.amount.toString().split('.')[1].length > 2;
     }
