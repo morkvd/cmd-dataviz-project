@@ -7,6 +7,8 @@ html {
   background-color: $color-background-html;
   min-height: 100%;
 
+  box-sizing: border-box;
+
   &.no-scroll {
 
     position: fixed;
@@ -16,6 +18,9 @@ html {
   }
 }
 
+*, *:before, *:after {
+  box-sizing: inherit;
+}
 
 html, body {
 
