@@ -112,9 +112,9 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
       transaction,
       {
         diffWithPrevTransaction:
-          (i === 0)
-          ? 0 // return 0 on first transaction because there isn't a previous transaction to compare to
-          : moment.utc(transaction.creationdate).diff(moment.utc(transactions[i - 1].creationdate), 'seconds')
+          i === 0
+            ? 0 // return 0 on first transaction because there isn't a previous transaction to compare to
+            : moment.utc(transaction.creationdate).diff(moment.utc(transactions[i - 1].creationdate), 'seconds')
       }
     );
   }
@@ -126,11 +126,11 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   function countRepeatedTries(values) {
     return (
       values.length === 1
-      ? 0
-      : values.sort(byCreationDate)
-              .map(addDifferenceBetweenCreationDates)
-              .filter(transactionsWithHighDifference)
-              .length
+        ? 0
+        : values.sort(byCreationDate)
+                .map(addDifferenceBetweenCreationDates)
+                .filter(transactionsWithHighDifference)
+                .length
     );
   }
 
@@ -147,12 +147,26 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   function addRepeatedTransactions(transaction) {
     return {
-      EmailIdRepeats: REPEATED_TRANSACTIONS_BY_EMAIL_ID[transaction.email_id],
-      CardIdRepeats: REPEATED_TRANSACTIONS_BY_CARD_ID[transaction.card_id],
+      emailIdRepeats: REPEATED_TRANSACTIONS_BY_EMAIL_ID[transaction.email_id],
+      cardIdRepeats: REPEATED_TRANSACTIONS_BY_CARD_ID[transaction.card_id],
     };
   }
 
   console.table(REPEATED_TRANSACTIONS_BY_EMAIL_ID);
+
+  function checkTwo(transaction) {
+    const scale = d3.scaleLinear()
+                    .domain([0, 10])
+                    .rangeRound([0, 25])
+                    .clamp(true);
+
+    const highestRepeats = (
+      transaction.cardIdRepeats > transaction.emailIdRepeats
+        ? transaction.cardIdRepeats
+        : transaction.emailIdRepeats
+    );
+    return { checkTwo: scale(highestRepeats) };
+  }
 
   /* Fraud check 3 'Shopper country is high risk' */
   // independent
@@ -190,10 +204,14 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
     return enhancedData.map(function(transaction) {
       return Object.assign({},
         checkOne(transaction),
+        checkTwo(transaction),
         transaction
       );
     });
   }
+
+  const SCORED_DATA = givePoints(ENHANCED_DATA);
+  console.table(SCORED_DATA);
 
   //const FINISHED_DATA = givePoints(ENHANCED_DATA);
   //console.table(FINISHED_DATA);
