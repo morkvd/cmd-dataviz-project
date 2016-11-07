@@ -46,10 +46,14 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   const STANDARDDEVIATION_UPPER = MEAN + STANDARDDEVIATION;
   const STANDARDDEVIATION_LOWER = MEAN - STANDARDDEVIATION;
 
+  // highest transaction value
   const TRANSACTION_MAX = d3.max(TRANSACTION_AMOUNTS);
 
+  // object where the keys are all email_id's and the values are the amount of quickly repeated
+  // transactions made with that email address.
   const REPEATED_TRANSACTIONS_BY_EMAIL_ID = createLookupObject(fraudData, 'email_id')
 
+  // same as above but with card_id.
   const REPEATED_TRANSACTIONS_BY_CARD_ID = createLookupObject(fraudData, 'card_id')
 
   /* SCALES */
@@ -107,14 +111,6 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   /* Fraud check #2 : 'Shopper email or card number is used in quick succession' */
 
-  function createLookupObject(data, field) {
-    return d3.nest()
-             .key(d => d[field])
-             .rollup(countRepeatedTries)
-             .entries(data)
-             .reduce(flattenObj, {});
-  }
-
   function byCreationDate(left, right) {
     return moment.utc(left.creationdate).diff(moment.utc(right.creationdate))
   };
@@ -150,6 +146,14 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   // returns combined object: { email1: 5, email2: 0, email3: 99}
   function flattenObj(a, b) {
     return Object.assign({}, a, { [b.key]: b.value });
+  }
+
+  function createLookupObject(data, field) {
+    return d3.nest()
+             .key(d => d[field])
+             .rollup(countRepeatedTries)
+             .entries(data)
+             .reduce(flattenObj, {});
   }
 
   function addRepeatedTransactions(transaction) {
