@@ -6,7 +6,7 @@ var browserSync = require('browser-sync').create();
 var sass = require('gulp-sass');
 
 // Static Server + watching scss/html files
-gulp.task('serve', ['html', 'sass'], function() {
+gulp.task('serve', ['html', 'sass', 'js', 'data'], function() {
 
   browserSync.init({
     server: "./build"
@@ -30,6 +30,18 @@ gulp.task('sass', function() {
     .pipe(sass().on('error', sass.logError))
     .pipe(gulp.dest('./build/assets/css'))
     .pipe(browserSync.stream());
+});
+
+// Move js files to build file
+gulp.task('js', function() {
+  return gulp.src("./source/js/**.*")
+    .pipe(gulp.dest('./build/assets/js'));
+});
+
+// Move data files to build file
+gulp.task('data', function() {
+  return gulp.src("./source/data/**.*")
+    .pipe(gulp.dest('./build/assets/data'));
 });
 
 gulp.task('default', ['serve']);

@@ -8,8 +8,7 @@ function preProcess(transaction) {
   );
 }
 
-d3.csv('data/data.csv', preProcess, function (fraudData) {
-
+d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   /* Program layout
 
     1. Calculate extra fields based on fraud checks and add these to each row (transaction)
@@ -19,7 +18,6 @@ d3.csv('data/data.csv', preProcess, function (fraudData) {
       we can easily tweak the point calculation)
     3. Draw the chart with d3
   */
-
 
   /* Fraud checks
 
@@ -34,91 +32,127 @@ d3.csv('data/data.csv', preProcess, function (fraudData) {
     5. Shopper country differs from issuing country and/or country of currency
     6. Card number already used by other shopper (shopper email)
     7. Transaction time check
-
   */
 
-  /* Fraud check 1 'The amount does not coincide with the average amount' */
 
-  // Calculate standardDeviation: (http://www.mathsisfun.com/data/standard-deviation.html)
 
-  const transactionAmounts = fraudData.map((transaction) => transaction.amount);
 
-  function mean(arr) {
-    return arr.reduce((a, b) => a + b) / arr.length
+  /* precalculation for check 1 */
+  function calculateMean(arr) {
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
   }
 
-  function variance(arr) {
-    let arrMean = mean(arr);
+  function calculateVariance(arr) {
+    let arrMean = calculateMean(arr);
     return arr.map(a => Math.pow(a - arrMean, 2)).reduce((a, b) => a + b) / arr.length;
   }
 
-  const transactionAmountsMean = mean(transactionAmounts);
-  const transactionAmountsVariance = variance(transactionAmounts)
-  const transactionAmountsStandardDeviation = Math.sqrt(transactionAmountsVariance)
+  // Get the amounts from the dataset
+  const TRANSACTION_AMOUNTS = fraudData.map((transaction) => transaction.amount);
 
-  console.log('mean');
-  console.log(transactionAmountsMean);
-  console.log('variance');
-  console.log(transactionAmountsVariance);
-  console.log('standardDeviation');
-  console.log(transactionAmountsStandardDeviation);
+  const MEAN = calculateMean(TRANSACTION_AMOUNTS);
 
-  function calculateDeviation (transaction) {
-    const deviation = (transaction.amount / transactionAmountsMean) * 100;
-    const differenceFromMean = transaction.amount - transactionAmountsMean;
+  // Calculate standardDeviation: (http://www.mathsisfun.com/data/standard-deviation.html)
+  const STANDARDDEVIATION = Math.sqrt(calculateVariance(TRANSACTION_AMOUNTS));
+
+  const TRANSACTION_MAX = d3.max(TRANSACTION_AMOUNTS);
+
+  function addDeviation(transaction) {
     return {
-      sd: transaction.amount % transactionAmountsStandardDeviation,
-      deviation: deviation,
-      differenceFromMean: differenceFromMean,
+      isAboveStandardDeviation: transaction.amount > (MEAN + STANDARDDEVIATION),
+      isBelowStandardDeviation: transaction.amount < (MEAN - STANDARDDEVIATION),
     };
   }
 
-  function addCalculatedFraudIndicators (transaction) {
-    return Object.assign({},
-      calculateDeviation (transaction),
-      transaction
-    );
+  function addPercentageDifference(transaction) {
+    return {
+      differenceInPercentage: (transaction.amount / MEAN) * 100,
+    };
   }
 
-  console.table(fraudData.map(addCalculatedFraudIndicators))
+  /* Fraud check 1 'The amount does not coincide with the average amount' */
+  function checkOne(transaction) {
+    const scale = d3.scaleLinear()
+                    .domain([MEAN + STANDARDDEVIATION, TRANSACTION_MAX])
+                    .rangeRound([0, 25])
+                    .clamp(true);
+
+    let points = 0;
+    let hasMoreThanTwoDecimalPlaces = false;
+
+    if (transaction.amount.toString().indexOf('.') !== -1) {
+      hasMoreThanTwoDecimalPlaces = transaction.amount.toString().split('.')[1].length > 2;
+    }
+
+
+    if (transaction.amount === 0 || hasMoreThanTwoDecimalPlaces) {
+      points = 25;
+    } else if (transaction.amount > (MEAN + STANDARDDEVIATION)) {
+      points = scale(transaction.amount);
+    }
+    return { checkOne: points };
+  }
 
   /* Fraud check 2 'Shopper email or card number is used in quick succession' */
 
+  // preprocessing check 2:
+  // step 1 nest data by email
+  // step 2 filter out all entries that have only one occurence
+  // step 3 for each remaining entry, sort transactions by date (use moment js)
+  // step 4 if there are less as N minutes between one transaction and the previous one,
+  //        add points else add no points
+
+  function nestBy(data, field) {
+    return d3.nest()
+             .key(function(d)  { return d[field]; })
+             .entries(data);
+  }
+
+  const NESTED_BY_EMAIL_ID = nestBy(fraudData, 'email_id').filter(function (d) { return d.values.length > 1 });
+  const NESTED_BY_CARD_ID = nestBy(fraudData, 'card_id').filter(function (d) { return d.values.length > 1 });
+
   /* Fraud check 3 'Shopper country is high risk' */
+  // independent
 
   /* Fraud check 4 ' Different countries used by the same shopper email address' */
+  // dependent
 
   /* Fraud check 5 'Shopper country differs from issuing country and/or country of currency' */
+  // independent
 
   /* Fraud check 6 'Card number already used by other shopper (shopper email)' */
+  // dependent
 
   /* Fraud check 7 'Transaction time check' */
+  // independent
 
-  /* Add fraud info to transaction */
+  /* Add aditional fraud info to transaction */
+
+  function addCalculatedFraudIndicators(data) {
+    return data.map(function(transaction) {
+      return Object.assign({},
+        addDeviation(transaction),
+        addPercentageDifference(transaction),
+        transaction
+      );
+    });
+  }
+
+  const ENHANCED_DATA = addCalculatedFraudIndicators(fraudData);
 
   /* Calculate Points */
-  const maxTransactionAmount = d3.max(fraudData.map((transaction) => transaction.amount))
+  function givePoints(enhancedData) {
+    return enhancedData.map(function(transaction) {
+      return Object.assign({},
+        checkOne(transaction),
+        transaction
+      );
+    });
+  }
 
-  const processedData = fraudData.map(addCalculatedFraudIndicators)
-
-  const varianceSum = processedData.map((transaction) => Math.pow(transaction.differenceFromMean, 2))
-                                   .reduce((previousVal, currentVal) => previousVal + currentVal);
-
-  const standardDeviation = Math.sqrt(varianceSum / processedData.length);
-
-  const scaleFraudCheck1 = d3.scaleLinear()
-                             .domain([amountMean + standardDeviation, maxTransactionAmount])
-                             .rangeRound([0, 20])
-                             .clamp(true);
-
-  /* Statistics over whole dataset */
-
-
-  console.log(standardDeviation);
-  console.log(amountMean);
+  //const FINISHED_DATA = givePoints(ENHANCED_DATA);
+  //console.table(FINISHED_DATA);
 
   /* Draw chart */
-
-
 
 });
