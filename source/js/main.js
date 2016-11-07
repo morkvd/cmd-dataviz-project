@@ -34,7 +34,8 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   */
 
 
-  /* precalculation for check 1 */
+  /* Fraud check #1 : 'The amount does not coincide with the average amount' */
+
   function calculateMean(arr) {
     return arr.reduce((a, b) => a + b, 0) / arr.length;
   }
@@ -67,7 +68,6 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
     };
   }
 
-  /* Fraud check 1 'The amount does not coincide with the average amount' */
   function checkOne(transaction) {
     const scale = d3.scaleLinear()
                     .domain([MEAN + STANDARDDEVIATION, TRANSACTION_MAX])
@@ -81,7 +81,6 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
       hasMoreThanTwoDecimalPlaces = transaction.amount.toString().split('.')[1].length > 2;
     }
 
-
     if (transaction.amount === 0 || hasMoreThanTwoDecimalPlaces) {
       points = 25;
     } else if (transaction.amount > (MEAN + STANDARDDEVIATION)) {
@@ -90,9 +89,9 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
     return { checkOne: points };
   }
 
-  /* Fraud check 2 'Shopper email or card number is used in quick succession' */
 
-  // preprocessing check 2:
+  /* Fraud check #2 : 'Shopper email or card number is used in quick succession' */
+
   function nestBy(data, field) {
     return d3.nest()
              .key(function(d)  { return d[field]; })
@@ -137,7 +136,6 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
     return Object.assign({}, a, { [b.key]: b.value });
   }
 
-
   const REPEATED_TRANSACTIONS_BY_EMAIL_ID = nestBy(fraudData, 'email_id').reduce(flattenObj, {})
 
   const REPEATED_TRANSACTIONS_BY_CARD_ID = nestBy(fraudData, 'card_id').reduce(flattenObj, {})
@@ -148,8 +146,6 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
       cardIdRepeats: REPEATED_TRANSACTIONS_BY_CARD_ID[transaction.card_id],
     };
   }
-
-  console.table(REPEATED_TRANSACTIONS_BY_EMAIL_ID);
 
   function checkTwo(transaction) {
     const scale = d3.scaleLinear()
@@ -165,20 +161,26 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
     return { checkTwo: scale(highestRepeats) };
   }
 
-  /* Fraud check 3 'Shopper country is high risk' */
+
+  /* Fraud check #3 : 'Shopper country is high risk' */
   // independent
 
-  /* Fraud check 4 ' Different countries used by the same shopper email address' */
+
+  /* Fraud check #4 : 'Different countries used by the same shopper email address' */
   // dependent
 
-  /* Fraud check 5 'Shopper country differs from issuing country and/or country of currency' */
+
+  /* Fraud check #5 : 'Shopper country differs from issuing country and/or country of currency' */
   // independent
 
-  /* Fraud check 6 'Card number already used by other shopper (shopper email)' */
+
+  /* Fraud check #6 : 'Card number already used by other shopper (shopper email)' */
   // dependent
 
-  /* Fraud check 7 'Transaction time check' */
+
+  /* Fraud check #7 : 'Transaction time check' */
   // independent
+
 
   /* Add aditional fraud info to transaction */
 
@@ -195,6 +197,7 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   const ENHANCED_DATA = addCalculatedFraudIndicators(fraudData);
 
+
   /* Calculate Points */
   function givePoints(enhancedData) {
     return enhancedData.map(function(transaction) {
@@ -209,8 +212,6 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   const SCORED_DATA = givePoints(ENHANCED_DATA);
   console.table(SCORED_DATA);
 
-  //const FINISHED_DATA = givePoints(ENHANCED_DATA);
-  //console.table(FINISHED_DATA);
 
   /* Draw chart */
 
