@@ -52,6 +52,17 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   const REPEATED_TRANSACTIONS_BY_CARD_ID = createLookupObject(fraudData, 'card_id')
 
+  /* SCALES */
+  const checkOneScale = d3.scaleLinear()
+                          .domain([STANDARDDEVIATION_UPPER, TRANSACTION_MAX])
+                          .rangeRound([0, 25])
+                          .clamp(true);
+
+  const checkTwoScale = d3.scaleLinear()
+                          .domain([0, 10])
+                          .rangeRound([0, 25])
+                          .clamp(true);
+
 
   /* Fraud check #1 : 'The amount does not coincide with the average amount' */
 
@@ -78,11 +89,6 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   }
 
   function checkOne(transaction) {
-    const scale = d3.scaleLinear()
-                    .domain([STANDARDDEVIATION_UPPER, TRANSACTION_MAX])
-                    .rangeRound([0, 25])
-                    .clamp(true);
-
     let points = 0;
     let hasMoreThanTwoDecimalPlaces = false;
 
@@ -93,7 +99,7 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
     if (transaction.amount === 0 || hasMoreThanTwoDecimalPlaces) {
       points = 25;
     } else if (transaction.amount > STANDARDDEVIATION_UPPER) {
-      points = scale(transaction.amount);
+      points = checkOneScale(transaction.amount);
     }
     return { checkOne: points };
   }
@@ -154,17 +160,12 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   }
 
   function checkTwo(transaction) {
-    const scale = d3.scaleLinear()
-                    .domain([0, 10])
-                    .rangeRound([0, 25])
-                    .clamp(true);
-
     const highestRepeats = (
       transaction.cardIdRepeats > transaction.emailIdRepeats
         ? transaction.cardIdRepeats
         : transaction.emailIdRepeats
     );
-    return { checkTwo: scale(highestRepeats) };
+    return { checkTwo: checkTwoScale(highestRepeats) };
   }
 
 
