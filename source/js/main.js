@@ -34,16 +34,7 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   */
 
 
-  /* Fraud check #1 : 'The amount does not coincide with the average amount' */
-
-  function calculateMean(arr) {
-    return arr.reduce((a, b) => a + b, 0) / arr.length;
-  }
-
-  function calculateVariance(arr) {
-    let arrMean = calculateMean(arr);
-    return arr.map(a => Math.pow(a - arrMean, 2)).reduce((a, b) => a + b) / arr.length;
-  }
+  /* GLOBAL VARIABLES */
 
   // Get the amounts from the dataset
   const TRANSACTION_AMOUNTS = fraudData.map((transaction) => transaction.amount);
@@ -54,6 +45,22 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   const STANDARDDEVIATION = Math.sqrt(calculateVariance(TRANSACTION_AMOUNTS));
 
   const TRANSACTION_MAX = d3.max(TRANSACTION_AMOUNTS);
+
+  const REPEATED_TRANSACTIONS_BY_EMAIL_ID = createLookupObject(fraudData, 'email_id')
+
+  const REPEATED_TRANSACTIONS_BY_CARD_ID = createLookupObject(fraudData, 'card_id')
+
+
+  /* Fraud check #1 : 'The amount does not coincide with the average amount' */
+
+  function calculateMean(arr) {
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
+  }
+
+  function calculateVariance(arr) {
+    let arrMean = calculateMean(arr);
+    return arr.map(a => Math.pow(a - arrMean, 2)).reduce((a, b) => a + b) / arr.length;
+  }
 
   function addDeviation(transaction) {
     return {
@@ -92,11 +99,12 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   /* Fraud check #2 : 'Shopper email or card number is used in quick succession' */
 
-  function nestBy(data, field) {
+  function createLookupObject(data, field) {
     return d3.nest()
              .key(d => d[field])
              .rollup(countRepeatedTries)
-             .entries(data);
+             .entries(data)
+             .reduce(flattenObj, {});
   }
 
   function byCreationDate(left, right) {
@@ -135,10 +143,6 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   function flattenObj(a, b) {
     return Object.assign({}, a, { [b.key]: b.value });
   }
-
-  const REPEATED_TRANSACTIONS_BY_EMAIL_ID = nestBy(fraudData, 'email_id').reduce(flattenObj, {})
-
-  const REPEATED_TRANSACTIONS_BY_CARD_ID = nestBy(fraudData, 'card_id').reduce(flattenObj, {})
 
   function addRepeatedTransactions(transaction) {
     return {
