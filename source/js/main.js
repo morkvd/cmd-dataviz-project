@@ -1,6 +1,5 @@
 function preProcess(transaction) {
-  return Object.assign(
-    {},
+  return Object.assign({},
     transaction,
     {
       amount: +transaction.amount // turn transaction amount into a Number
@@ -33,8 +32,6 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
     6. Card number already used by other shopper (shopper email)
     7. Transaction time check
   */
-
-
 
 
   /* precalculation for check 1 */
@@ -197,7 +194,6 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   }
 
   const ENHANCED_DATA = addCalculatedFraudIndicators(fraudData);
-  console.table(ENHANCED_DATA);
 
   /* Calculate Points */
   function givePoints(enhancedData) {
