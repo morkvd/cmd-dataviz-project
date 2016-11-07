@@ -93,12 +93,12 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   }
 
   function checkOne(transaction) {
-    let points = 0;
-    let hasMoreThanTwoDecimalPlaces = false;
+    const transactionAmountAsString = transaction.amount.toString();
 
-    if (transaction.amount.toString().indexOf('.') !== -1) {
-      hasMoreThanTwoDecimalPlaces = transaction.amount.toString().split('.')[1].length > 2;
-    }
+    let points = 0;
+    let hasMoreThanTwoDecimalPlaces = (transactionAmountAsString.indexOf('.') !== -1)
+      ? (transactionAmountAsString.split('.')[1].length > 2)
+      : false;
 
     if (transaction.amount === 0 || hasMoreThanTwoDecimalPlaces) {
       points = 25;
@@ -222,6 +222,22 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   const SCORED_DATA = givePoints(ENHANCED_DATA);
   console.table(SCORED_DATA);
+
+  // /* extract country codes from data */
+  // function extractCountries(datas, key) {
+  //   let arr = [];
+  //   for (let transaction of datas) {
+  //     arr.push(transaction[key]);
+  //   }
+  //   return arr;
+  // }
+  //
+  // console.log(
+  //   extractCountries(SCORED_DATA, 'issuercountrycode')
+  //     .concat(extractCountries(SCORED_DATA, 'shoppercountrycode'))
+  //     .sort()
+  //     .filter((item, pos, ary) => !pos || item != ary[pos - 1])
+  // );
 
 
   /* Draw chart */
