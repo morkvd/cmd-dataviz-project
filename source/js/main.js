@@ -246,6 +246,9 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   /* Fraud check #3 : 'Shopper country is high risk' */
   // independent
+  function checkThree(transaction) {
+    return { checkThree: COUNTRY_THREAT_LEVEL[transaction.shoppercountrycode] };
+  }
 
 
   /* Fraud check #4 : 'Different countries used by the same shopper email address' */
@@ -286,6 +289,7 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
       return Object.assign({},
         checkOne(transaction),
         checkTwo(transaction),
+        checkThree(transaction),
         transaction
       );
     });
