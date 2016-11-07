@@ -43,6 +43,8 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   // Calculate standardDeviation: (http://www.mathsisfun.com/data/standard-deviation.html)
   const STANDARDDEVIATION = calculateStandardDeviation(TRANSACTION_AMOUNTS);
+  const STANDARDDEVIATION_UPPER = MEAN + STANDARDDEVIATION;
+  const STANDARDDEVIATION_LOWER = MEAN - STANDARDDEVIATION;
 
   const TRANSACTION_MAX = d3.max(TRANSACTION_AMOUNTS);
 
@@ -64,8 +66,8 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   function addDeviation(transaction) {
     return {
-      isAboveStandardDeviation: transaction.amount > (MEAN + STANDARDDEVIATION),
-      isBelowStandardDeviation: transaction.amount < (MEAN - STANDARDDEVIATION),
+      isAboveStandardDeviation: transaction.amount > STANDARDDEVIATION_UPPER,
+      isBelowStandardDeviation: transaction.amount < STANDARDDEVIATION_LOWER,
     };
   }
 
@@ -77,7 +79,7 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   function checkOne(transaction) {
     const scale = d3.scaleLinear()
-                    .domain([MEAN + STANDARDDEVIATION, TRANSACTION_MAX])
+                    .domain([STANDARDDEVIATION_UPPER, TRANSACTION_MAX])
                     .rangeRound([0, 25])
                     .clamp(true);
 
@@ -90,7 +92,7 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
     if (transaction.amount === 0 || hasMoreThanTwoDecimalPlaces) {
       points = 25;
-    } else if (transaction.amount > (MEAN + STANDARDDEVIATION)) {
+    } else if (transaction.amount > STANDARDDEVIATION_UPPER) {
       points = scale(transaction.amount);
     }
     return { checkOne: points };
