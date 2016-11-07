@@ -42,7 +42,7 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   const MEAN = calculateMean(TRANSACTION_AMOUNTS);
 
   // Calculate standardDeviation: (http://www.mathsisfun.com/data/standard-deviation.html)
-  const STANDARDDEVIATION = Math.sqrt(calculateVariance(TRANSACTION_AMOUNTS));
+  const STANDARDDEVIATION = calculateStandardDeviation(TRANSACTION_AMOUNTS);
 
   const TRANSACTION_MAX = d3.max(TRANSACTION_AMOUNTS);
 
@@ -57,9 +57,9 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
     return arr.reduce((a, b) => a + b, 0) / arr.length;
   }
 
-  function calculateVariance(arr) {
+  function calculateStandardDeviation(arr) {
     let arrMean = calculateMean(arr);
-    return arr.map(a => Math.pow(a - arrMean, 2)).reduce((a, b) => a + b) / arr.length;
+    return Math.sqrt(arr.map(a => Math.pow(a - arrMean, 2)).reduce((a, b) => a + b) / arr.length);
   }
 
   function addDeviation(transaction) {
