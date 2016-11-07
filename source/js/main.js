@@ -105,11 +105,28 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   function nestBy(data, field) {
     return d3.nest()
              .key(function(d)  { return d[field]; })
+             //.rollup(countRepeatedTries)
              .entries(data);
   }
 
-  const NESTED_BY_EMAIL_ID = nestBy(fraudData, 'email_id').filter(function (d) { return d.values.length > 1 });
-  const NESTED_BY_CARD_ID = nestBy(fraudData, 'card_id').filter(function (d) { return d.values.length > 1 });
+  function sortOnDate(v) {
+    return v.sort(function (left, right) {
+      return moment.utc(left.creationdate).diff(moment.utc(right.creationdate))
+    });
+  }
+
+  const NESTED_BY_EMAIL_ID = nestBy(fraudData, 'email_id').filter(function (a) {
+    return a.values.length > 1;
+  });
+
+  const NESTED_BY_CARD_ID = nestBy(fraudData, 'card_id').filter(function (d) {
+    return d.values.length > 1;
+  });
+  console.table(NESTED_BY_CARD_ID);
+  console.table(NESTED_BY_CARD_ID[0].values)
+  console.table(sortOnDate(NESTED_BY_CARD_ID[0].values))
+
+
 
   /* Fraud check 3 'Shopper country is high risk' */
   // independent
