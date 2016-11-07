@@ -94,7 +94,7 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   function nestBy(data, field) {
     return d3.nest()
-             .key(function(d)  { return d[field]; })
+             .key(d => d[field])
              .rollup(countRepeatedTries)
              .entries(data);
   }
@@ -185,7 +185,7 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   /* Add aditional fraud info to transaction */
 
   function addCalculatedFraudIndicators(data) {
-    return data.map(function(transaction) {
+    return data.map(transaction => {
       return Object.assign({},
         addDeviation(transaction),
         addPercentageDifference(transaction),
@@ -200,7 +200,7 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   /* Calculate Points */
   function givePoints(enhancedData) {
-    return enhancedData.map(function(transaction) {
+    return enhancedData.map(transaction => {
       return Object.assign({},
         checkOne(transaction),
         checkTwo(transaction),
