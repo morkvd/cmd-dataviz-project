@@ -96,36 +96,58 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   /* Fraud check 2 'Shopper email or card number is used in quick succession' */
 
   // preprocessing check 2:
-  // step 1 nest data by email
-  // step 2 filter out all entries that have only one occurence
-  // step 3 for each remaining entry, sort transactions by date (use moment js)
-  // step 4 if there are less as N minutes between one transaction and the previous one,
-  //        add points else add no points
-
   function nestBy(data, field) {
     return d3.nest()
              .key(function(d)  { return d[field]; })
-             //.rollup(countRepeatedTries)
+             .rollup(countRepeatedTries)
              .entries(data);
   }
 
-  function sortOnDate(v) {
-    return v.sort(function (left, right) {
-      return moment.utc(left.creationdate).diff(moment.utc(right.creationdate))
-    });
+  function byCreationDate(left, right) {
+    return moment.utc(left.creationdate).diff(moment.utc(right.creationdate))
+  };
+
+  function addDifferenceBetweenCreationDates(transaction, i, transactions) {
+    return Object.assign({},
+      transaction,
+      {
+        diffWithPrevTransaction:
+          (i === 0)
+          ? 0 // return 0 on first transaction because there isn't a previous transaction to compare to
+          : moment.utc(transaction.creationdate).diff(moment.utc(transactions[i - 1].creationdate), 'seconds')
+      }
+    );
   }
 
-  const NESTED_BY_EMAIL_ID = nestBy(fraudData, 'email_id').filter(function (a) {
-    return a.values.length > 1;
-  });
+  function transactionsWithHighDifference(transaction) {
+    return transaction.diffWithPrevTransaction < 900;
+  }
 
-  const NESTED_BY_CARD_ID = nestBy(fraudData, 'card_id').filter(function (d) {
-    return d.values.length > 1;
-  });
-  console.table(NESTED_BY_CARD_ID);
-  console.table(NESTED_BY_CARD_ID[0].values)
-  console.table(sortOnDate(NESTED_BY_CARD_ID[0].values))
+  function countRepeatedTries(values) {
+    return (
+      values.length === 1
+      ? 0
+      : values.sort(byCreationDate)
+              .map(addDifferenceBetweenCreationDates)
+              .filter(transactionsWithHighDifference)
+              .length
+    );
+  }
 
+  // takes an array of objects: [{email1: 5}, {email2: 0}, {email3: 99}]
+  // returns combined object: { email1: 5, email2: 0, email3: 99}
+  function flattenObj(a, b) {
+    return Object.assign({}, a, { [b.key]: b.value });
+  }
+
+
+  const REPEATED_TRANSACTIONS_BY_EMAIL_ID = nestBy(fraudData, 'email_id').reduce(flattenObj, {})
+
+  const REPEATED_TRANSACTIONS_BY_CARD_ID = nestBy(fraudData, 'card_id').reduce(flattenObj, {})
+
+  console.table(REPEATED_TRANSACTIONS_BY_EMAIL_ID);
+
+  console.table(REPEATED_TRANSACTIONS_BY_CARD_ID);
 
 
   /* Fraud check 3 'Shopper country is high risk' */
