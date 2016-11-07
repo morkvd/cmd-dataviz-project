@@ -1,6 +1,5 @@
 function preProcess(transaction) {
-  return Object.assign(
-    {},
+  return Object.assign({},
     transaction,
     {
       amount: +transaction.amount // turn transaction amount into a Number
@@ -35,17 +34,7 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   */
 
 
-
-
-  /* precalculation for check 1 */
-  function calculateMean(arr) {
-    return arr.reduce((a, b) => a + b, 0) / arr.length;
-  }
-
-  function calculateVariance(arr) {
-    let arrMean = calculateMean(arr);
-    return arr.map(a => Math.pow(a - arrMean, 2)).reduce((a, b) => a + b) / arr.length;
-  }
+  /* GLOBAL VARIABLES */
 
   // Get the amounts from the dataset
   const TRANSACTION_AMOUNTS = fraudData.map((transaction) => transaction.amount);
@@ -53,14 +42,47 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   const MEAN = calculateMean(TRANSACTION_AMOUNTS);
 
   // Calculate standardDeviation: (http://www.mathsisfun.com/data/standard-deviation.html)
-  const STANDARDDEVIATION = Math.sqrt(calculateVariance(TRANSACTION_AMOUNTS));
+  const STANDARDDEVIATION = calculateStandardDeviation(TRANSACTION_AMOUNTS);
+  const STANDARDDEVIATION_UPPER = MEAN + STANDARDDEVIATION;
+  const STANDARDDEVIATION_LOWER = MEAN - STANDARDDEVIATION;
 
+  // highest transaction value
   const TRANSACTION_MAX = d3.max(TRANSACTION_AMOUNTS);
+
+  // object where the keys are all email_id's and the values are the amount of quickly repeated
+  // transactions made with that email address.
+  const REPEATED_TRANSACTIONS_BY_EMAIL_ID = createLookupObject(fraudData, 'email_id')
+
+  // same as above but with card_id.
+  const REPEATED_TRANSACTIONS_BY_CARD_ID = createLookupObject(fraudData, 'card_id')
+
+  /* SCALES */
+  const checkOneScale = d3.scaleLinear()
+                          .domain([STANDARDDEVIATION_UPPER, TRANSACTION_MAX])
+                          .rangeRound([0, 25])
+                          .clamp(true);
+
+  const checkTwoScale = d3.scaleLinear()
+                          .domain([0, 10])
+                          .rangeRound([0, 25])
+                          .clamp(true);
+
+
+  /* Fraud check #1 : 'The amount does not coincide with the average amount' */
+
+  function calculateMean(arr) {
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
+  }
+
+  function calculateStandardDeviation(arr) {
+    let arrMean = calculateMean(arr);
+    return Math.sqrt(arr.map(a => Math.pow(a - arrMean, 2)).reduce((a, b) => a + b) / arr.length);
+  }
 
   function addDeviation(transaction) {
     return {
-      isAboveStandardDeviation: transaction.amount > (MEAN + STANDARDDEVIATION),
-      isBelowStandardDeviation: transaction.amount < (MEAN - STANDARDDEVIATION),
+      isAboveStandardDeviation: transaction.amount > STANDARDDEVIATION_UPPER,
+      isBelowStandardDeviation: transaction.amount < STANDARDDEVIATION_LOWER,
     };
   }
 
@@ -70,69 +92,115 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
     };
   }
 
-  /* Fraud check 1 'The amount does not coincide with the average amount' */
   function checkOne(transaction) {
-    const scale = d3.scaleLinear()
-                    .domain([MEAN + STANDARDDEVIATION, TRANSACTION_MAX])
-                    .rangeRound([0, 25])
-                    .clamp(true);
+    const transactionAmountAsString = transaction.amount.toString();
 
     let points = 0;
-    let hasMoreThanTwoDecimalPlaces = false;
-
-    if (transaction.amount.toString().indexOf('.') !== -1) {
-      hasMoreThanTwoDecimalPlaces = transaction.amount.toString().split('.')[1].length > 2;
-    }
-
+    let hasMoreThanTwoDecimalPlaces = (transactionAmountAsString.indexOf('.') !== -1)
+      ? (transactionAmountAsString.split('.')[1].length > 2)
+      : false;
 
     if (transaction.amount === 0 || hasMoreThanTwoDecimalPlaces) {
       points = 25;
-    } else if (transaction.amount > (MEAN + STANDARDDEVIATION)) {
-      points = scale(transaction.amount);
+    } else if (transaction.amount > STANDARDDEVIATION_UPPER) {
+      points = checkOneScale(transaction.amount);
     }
     return { checkOne: points };
   }
 
-  /* Fraud check 2 'Shopper email or card number is used in quick succession' */
 
-  // preprocessing check 2:
-  // step 1 nest data by email
-  // step 2 filter out all entries that have only one occurence
-  // step 3 for each remaining entry, sort transactions by date (use moment js)
-  // step 4 if there are less as N minutes between one transaction and the previous one,
-  //        add points else add no points
+  /* Fraud check #2 : 'Shopper email or card number is used in quick succession' */
 
-  function nestBy(data, field) {
-    return d3.nest()
-             .key(function(d)  { return d[field]; })
-             .entries(data);
+  function byCreationDate(left, right) {
+    return moment.utc(left.creationdate).diff(moment.utc(right.creationdate))
+  };
+
+  function addDifferenceBetweenCreationDates(transaction, i, transactions) {
+    return Object.assign({},
+      transaction,
+      {
+        diffWithPrevTransaction:
+          i === 0
+            ? 0 // return 0 on first transaction because there isn't a previous transaction to compare to
+            : moment.utc(transaction.creationdate).diff(moment.utc(transactions[i - 1].creationdate), 'seconds')
+      }
+    );
   }
 
-  const NESTED_BY_EMAIL_ID = nestBy(fraudData, 'email_id').filter(function (d) { return d.values.length > 1 });
-  const NESTED_BY_CARD_ID = nestBy(fraudData, 'card_id').filter(function (d) { return d.values.length > 1 });
+  function transactionsWithHighDifference(transaction) {
+    return transaction.diffWithPrevTransaction < 900;
+  }
 
-  /* Fraud check 3 'Shopper country is high risk' */
+  function countRepeatedTries(values) {
+    return (
+      values.length === 1
+        ? 0
+        : values.sort(byCreationDate)
+                .map(addDifferenceBetweenCreationDates)
+                .filter(transactionsWithHighDifference)
+                .length
+    );
+  }
+
+  // takes an array of objects: [{email1: 5}, {email2: 0}, {email3: 99}]
+  // returns combined object: { email1: 5, email2: 0, email3: 99}
+  function flattenObj(a, b) {
+    return Object.assign({}, a, { [b.key]: b.value });
+  }
+
+  function createLookupObject(data, field) {
+    return d3.nest()
+             .key(d => d[field])
+             .rollup(countRepeatedTries)
+             .entries(data)
+             .reduce(flattenObj, {});
+  }
+
+  function addRepeatedTransactions(transaction) {
+    return {
+      emailIdRepeats: REPEATED_TRANSACTIONS_BY_EMAIL_ID[transaction.email_id],
+      cardIdRepeats: REPEATED_TRANSACTIONS_BY_CARD_ID[transaction.card_id],
+    };
+  }
+
+  function checkTwo(transaction) {
+    const highestRepeats = (
+      transaction.cardIdRepeats > transaction.emailIdRepeats
+        ? transaction.cardIdRepeats
+        : transaction.emailIdRepeats
+    );
+    return { checkTwo: checkTwoScale(highestRepeats) };
+  }
+
+
+  /* Fraud check #3 : 'Shopper country is high risk' */
   // independent
 
-  /* Fraud check 4 ' Different countries used by the same shopper email address' */
+
+  /* Fraud check #4 : 'Different countries used by the same shopper email address' */
   // dependent
 
-  /* Fraud check 5 'Shopper country differs from issuing country and/or country of currency' */
+
+  /* Fraud check #5 : 'Shopper country differs from issuing country and/or country of currency' */
   // independent
 
-  /* Fraud check 6 'Card number already used by other shopper (shopper email)' */
+
+  /* Fraud check #6 : 'Card number already used by other shopper (shopper email)' */
   // dependent
 
-  /* Fraud check 7 'Transaction time check' */
+
+  /* Fraud check #7 : 'Transaction time check' */
   // independent
+
 
   /* Add aditional fraud info to transaction */
 
   function addCalculatedFraudIndicators(data) {
-    return data.map(function(transaction) {
+    return data.map(transaction => {
       return Object.assign({},
         addDeviation(transaction),
         addPercentageDifference(transaction),
+        addRepeatedTransactions(transaction),
         transaction
       );
     });
@@ -140,18 +208,37 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   const ENHANCED_DATA = addCalculatedFraudIndicators(fraudData);
 
+
   /* Calculate Points */
   function givePoints(enhancedData) {
-    return enhancedData.map(function(transaction) {
+    return enhancedData.map(transaction => {
       return Object.assign({},
         checkOne(transaction),
+        checkTwo(transaction),
         transaction
       );
     });
   }
 
-  //const FINISHED_DATA = givePoints(ENHANCED_DATA);
-  //console.table(FINISHED_DATA);
+  const SCORED_DATA = givePoints(ENHANCED_DATA);
+  console.table(SCORED_DATA);
+
+  // /* extract country codes from data */
+  // function extractCountries(datas, key) {
+  //   let arr = [];
+  //   for (let transaction of datas) {
+  //     arr.push(transaction[key]);
+  //   }
+  //   return arr;
+  // }
+  //
+  // console.log(
+  //   extractCountries(SCORED_DATA, 'issuercountrycode')
+  //     .concat(extractCountries(SCORED_DATA, 'shoppercountrycode'))
+  //     .sort()
+  //     .filter((item, pos, ary) => !pos || item != ary[pos - 1])
+  // );
+
 
   /* Draw chart */
 
