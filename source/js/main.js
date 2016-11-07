@@ -145,10 +145,14 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   const REPEATED_TRANSACTIONS_BY_CARD_ID = nestBy(fraudData, 'card_id').reduce(flattenObj, {})
 
+  function addRepeatedTransactions(transaction) {
+    return {
+      EmailIdRepeats: REPEATED_TRANSACTIONS_BY_EMAIL_ID[transaction.email_id],
+      CardIdRepeats: REPEATED_TRANSACTIONS_BY_CARD_ID[transaction.card_id],
+    };
+  }
+
   console.table(REPEATED_TRANSACTIONS_BY_EMAIL_ID);
-
-  console.table(REPEATED_TRANSACTIONS_BY_CARD_ID);
-
 
   /* Fraud check 3 'Shopper country is high risk' */
   // independent
@@ -172,12 +176,14 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
       return Object.assign({},
         addDeviation(transaction),
         addPercentageDifference(transaction),
+        addRepeatedTransactions(transaction),
         transaction
       );
     });
   }
 
   const ENHANCED_DATA = addCalculatedFraudIndicators(fraudData);
+  console.table(ENHANCED_DATA);
 
   /* Calculate Points */
   function givePoints(enhancedData) {
