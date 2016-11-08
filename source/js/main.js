@@ -142,6 +142,8 @@ function fraudeCheck(fraudData, currencyData) {
 
   const COUNTRIES_BY_EMAIL_ID = createLookupObject(fraudData, 'email_id', countCountries);
 
+  const EMAIL_IDS_BY_CARD_ID = createLookupObject(fraudData, 'card_id', countEmailIds);
+
   const COUNTRIES_BY_CURRENCY = createLookupObject(currencyData, 'Code', listCountries);
 
 
@@ -163,6 +165,11 @@ function fraudeCheck(fraudData, currencyData) {
 
   const checkFiveScale = d3.scaleLinear()
                           .domain([0, 3])
+                          .rangeRound([0, 25])
+                          .clamp(true);
+
+  const checkSixScale = d3.scaleLinear()
+                          .domain([1, 5])
                           .rangeRound([0, 25])
                           .clamp(true);
 
@@ -330,6 +337,17 @@ function fraudeCheck(fraudData, currencyData) {
   /* Fraud check #6 : 'Card number already used by other shopper (shopper email)' */
   // dependent
 
+  function countEmailIds(values) {
+    return values.map(transaction => transaction.email_id)
+                 .sort()
+                 .filter((item, pos, ary) => !pos || item != ary[pos - 1]) // filter out duplicates (keep item if it is not the same as the previous item)
+                 .length;
+  }
+
+  function checkSix(transaction) {
+    return { checkSix: checkSixScale(EMAIL_IDS_BY_CARD_ID[transaction.card_id]) }
+  }
+
 
   /* Fraud check #7 : 'Transaction time check' */
   // independent
@@ -361,6 +379,7 @@ function fraudeCheck(fraudData, currencyData) {
         checkThree(transaction),
         checkFour(transaction),
         checkFive(transaction),
+        checkSix(transaction),
         transaction
       );
     });
