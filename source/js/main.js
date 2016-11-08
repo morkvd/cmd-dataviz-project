@@ -7,6 +7,8 @@ function preProcess(transaction) {
   );
 }
 
+//currency country mapping from: https://gist.github.com/HarishChaudhari/4680482
+
 d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   /* Program layout
 
@@ -330,8 +332,8 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   // }
   //
   // console.log(
-  //   extractCountries(SCORED_DATA, 'issuercountrycode')
-  //     .concat(extractCountries(SCORED_DATA, 'shoppercountrycode'))
+  //   extractCountries(SCORED_DATA, 'currencycode')
+  //     .concat(extractCountries(SCORED_DATA, 'currencycode'))
   //     .sort()
   //     .filter((item, pos, ary) => !pos || item != ary[pos - 1])
   // );
