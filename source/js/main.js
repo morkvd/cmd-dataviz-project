@@ -51,10 +51,10 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   // object where the keys are all email_id's and the values are the amount of quickly repeated
   // transactions made with that email address.
-  const REPEATED_TRANSACTIONS_BY_EMAIL_ID = createLookupObject(fraudData, 'email_id')
+  const REPEATED_TRANSACTIONS_BY_EMAIL_ID = createLookupObject(fraudData, 'email_id', countRepeatedTries)
 
   // same as above but with card_id.
-  const REPEATED_TRANSACTIONS_BY_CARD_ID = createLookupObject(fraudData, 'card_id')
+  const REPEATED_TRANSACTIONS_BY_CARD_ID = createLookupObject(fraudData, 'card_id', countRepeatedTries)
 
   const COUNTRY_THREAT_LEVEL = {
     "": 17,
@@ -219,10 +219,10 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
     return Object.assign({}, a, { [b.key]: b.value });
   }
 
-  function createLookupObject(data, field) {
+  function createLookupObject(data, field, rollupFun) {
     return d3.nest()
              .key(d => d[field])
-             .rollup(countRepeatedTries)
+             .rollup(rollupFun)
              .entries(data)
              .reduce(flattenObj, {});
   }
