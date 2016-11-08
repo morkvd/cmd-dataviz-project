@@ -9,9 +9,18 @@ function preProcess(transaction) {
 
 //currency country mapping from: https://gist.github.com/HarishChaudhari/4680482
 
-d3.csv('/assets/data/data.csv', preProcess, fraudeCheck);
+d3.queue()
+  .defer(d3.csv, '/assets/data/data.csv', preProcess)
+  .defer(d3.csv, '/assets/data/Country_Currency_Code_Mappings.csv')
+  .await((error, paymentData, currencyData) => {
+    if (error) {
+      console.error(`problem loading data: ${error}`);
+    } else {
+      fraudeCheck(paymentData, currencyData)
+    }
+  });
 
-function fraudeCheck(fraudData) {
+function fraudeCheck(fraudData, currencyData) {
   /* Program layout
 
     1. Calculate extra fields based on fraud checks and add these to each row (transaction)
