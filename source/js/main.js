@@ -127,6 +127,11 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
     "US": 10
   };
 
+  const TRANSACTIONS_BY_EMAIL = createLookupObject(fraudData, 'email_id', countCountries);
+
+  console.table(TRANSACTIONS_BY_EMAIL);
+
+
   /* SCALES */
   const checkOneScale = d3.scaleLinear()
                           .domain([STANDARDDEVIATION_UPPER, TRANSACTION_MAX])
@@ -255,6 +260,15 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   /* Fraud check #4 : 'Different countries used by the same shopper email address' */
   // dependent
+
+  // takes values of nested data
+  // returns amount of shoppercountrycodes
+  function countCountries(values) {
+    return values.map(transaction => transaction.shoppercountrycode)
+                 .sort()
+                 .filter((item, pos, ary) => !pos || item != ary[pos - 1])
+                 .length;
+  }
 
 
   /* Fraud check #5 : 'Shopper country differs from issuing country and/or country of currency' */
