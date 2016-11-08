@@ -7,7 +7,20 @@ function preProcess(transaction) {
   );
 }
 
-d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
+//currency country mapping from: https://gist.github.com/HarishChaudhari/4680482
+
+d3.queue()
+  .defer(d3.csv, '/assets/data/data.csv', preProcess)
+  .defer(d3.csv, '/assets/data/Country_Currency_Code_Mappings.csv')
+  .await((error, paymentData, currencyData) => {
+    if (error) {
+      console.error(`problem loading data: ${error}`);
+    } else {
+      fraudeCheck(paymentData, currencyData)
+    }
+  });
+
+function fraudeCheck(fraudData, currencyData) {
   /* Program layout
 
     1. Calculate extra fields based on fraud checks and add these to each row (transaction)
@@ -51,10 +64,88 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   // object where the keys are all email_id's and the values are the amount of quickly repeated
   // transactions made with that email address.
-  const REPEATED_TRANSACTIONS_BY_EMAIL_ID = createLookupObject(fraudData, 'email_id')
+  const REPEATED_TRANSACTIONS_BY_EMAIL_ID = createLookupObject(fraudData, 'email_id', countRepeatedTries)
 
   // same as above but with card_id.
-  const REPEATED_TRANSACTIONS_BY_CARD_ID = createLookupObject(fraudData, 'card_id')
+  const REPEATED_TRANSACTIONS_BY_CARD_ID = createLookupObject(fraudData, 'card_id', countRepeatedTries)
+
+  const COUNTRY_THREAT_LEVEL = {
+    "": 17,
+    "(unknown)": 17,
+    "AE": 20,
+    "AL": 5,
+    "AT": 3,
+    "AU": 7,
+    "AW": 12,
+    "BA": 8,
+    "BE": 2,
+    "BG": 17,
+    "BR": 25,
+    "CA": 2,
+    "CH": 1,
+    "CN": 20,
+    "CO": 23,
+    "CW": 10,
+    "CY": 5,
+    "CZ": 8,
+    "DE": 3,
+    "DK": 1,
+    "DO": 14,
+    "EC": 15,
+    "EE": 2,
+    "EG": 10,
+    "ES": 4,
+    "FI": 1,
+    "FR": 3,
+    "GB": 4,
+    "GI": 21,
+    "GR": 5,
+    "HK": 18,
+    "HU": 20,
+    "IL": 12,
+    "IN": 22,
+    "IR": 3,
+    "IS": 8,
+    "IT": 3,
+    "JO": 13,
+    "JP": 16,
+    "KR": 17,
+    "KZ": 8,
+    "LU": 2,
+    "LV": 9,
+    "MA": 12,
+    "MM": 13,
+    "MT": 18,
+    "MX": 25,
+    "MY": 14,
+    "NG": 20,
+    "NL": 2,
+    "NO": 1,
+    "NZ": 1,
+    "PA": 15,
+    "PE": 16,
+    "PH": 23,
+    "PT": 2,
+    "RO": 25,
+    "RS": 4,
+    "RU": 19,
+    "SE": 2,
+    "SG": 7,
+    "SI": 15,
+    "SK": 4,
+    "SN": 21,
+    "TH": 18,
+    "TR": 11,
+    "TW": 13,
+    "US": 10
+  };
+
+  const COUNTRIES_BY_EMAIL_ID = createLookupObject(fraudData, 'email_id', countCountries);
+
+  const EMAIL_IDS_BY_CARD_ID = createLookupObject(fraudData, 'card_id', countEmailIds);
+
+  const COUNTRIES_BY_CURRENCY = createLookupObject(currencyData, 'Code', listCountries);
+
 
   /* SCALES */
   const checkOneScale = d3.scaleLinear()
@@ -64,6 +155,21 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   const checkTwoScale = d3.scaleLinear()
                           .domain([0, 10])
+                          .rangeRound([0, 25])
+                          .clamp(true);
+
+  const checkFourScale = d3.scaleLinear()
+                          .domain([1, 3])
+                          .rangeRound([0, 25])
+                          .clamp(true);
+
+  const checkFiveScale = d3.scaleLinear()
+                          .domain([0, 3])
+                          .rangeRound([0, 25])
+                          .clamp(true);
+
+  const checkSixScale = d3.scaleLinear()
+                          .domain([1, 5])
                           .rangeRound([0, 25])
                           .clamp(true);
 
@@ -131,6 +237,8 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
     return transaction.diffWithPrevTransaction < 900;
   }
 
+  // takes values of nested data
+  // returns amount of quickly repeating transactions
   function countRepeatedTries(values) {
     return (
       values.length === 1
@@ -148,10 +256,10 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
     return Object.assign({}, a, { [b.key]: b.value });
   }
 
-  function createLookupObject(data, field) {
+  function createLookupObject(data, field, rollupFun) {
     return d3.nest()
              .key(d => d[field])
-             .rollup(countRepeatedTries)
+             .rollup(rollupFun)
              .entries(data)
              .reduce(flattenObj, {});
   }
@@ -175,18 +283,70 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   /* Fraud check #3 : 'Shopper country is high risk' */
   // independent
+  function checkThree(transaction) {
+    return { checkThree: COUNTRY_THREAT_LEVEL[transaction.shoppercountrycode] };
+  }
 
 
   /* Fraud check #4 : 'Different countries used by the same shopper email address' */
   // dependent
 
+  // takes values of nested data
+  // returns amount of shoppercountrycodes
+  function countCountries(values) {
+    return values.map(transaction => transaction.shoppercountrycode)
+                 .sort()
+                 .filter((item, pos, ary) => !pos || item != ary[pos - 1]) // filter out duplicates (keep item if it is not the same as the previous item)
+                 .length;
+  }
+
+  function checkFour(transaction) {
+    return { checkFour: checkFourScale(COUNTRIES_BY_EMAIL_ID[transaction.email_id]) }
+  }
+
 
   /* Fraud check #5 : 'Shopper country differs from issuing country and/or country of currency' */
   // independent
+  function listCountries(values) {
+    return values.map(country => country.CountryCode)
+  }
+
+  //  currencycode        vs  issuercountrycode    = currencyVsIssuerCountry
+  //  currencycode        vs  shoppercountrycode   = currencyVsShopperCountry
+  //  issuercountrycode   vs  shoppercountrycode   = IssuerCountryVsShopperCountry
+  function addCountryDifferences(transaction) {
+    return {
+      currencyVsIssuerCountry:
+        COUNTRIES_BY_CURRENCY[transaction.currencycode].indexOf(transaction.issuercountrycode) > -1,
+      currencyVsShopperCountry:
+        COUNTRIES_BY_CURRENCY[transaction.currencycode].indexOf(transaction.shoppercountrycode) > -1,
+      IssuerCountryVsShopperCountry:
+        transaction.issuercountrycode === transaction.shoppercountrycode,
+    };
+  }
+
+  function checkFive(transaction) {
+    return {
+      checkFive: checkFiveScale(!transaction.currencyVsIssuerCountry +
+                                !transaction.currencyVsShopperCountry +
+                                !transaction.IssuerCountryVsShopperCountry),
+    };
+  }
 
 
   /* Fraud check #6 : 'Card number already used by other shopper (shopper email)' */
   // dependent
+
+  function countEmailIds(values) {
+    return values.map(transaction => transaction.email_id)
+                 .sort()
+                 .filter((item, pos, ary) => !pos || item != ary[pos - 1]) // filter out duplicates (keep item if it is not the same as the previous item)
+                 .length;
+  }
+
+  function checkSix(transaction) {
+    return { checkSix: checkSixScale(EMAIL_IDS_BY_CARD_ID[transaction.card_id]) }
+  }
 
 
   /* Fraud check #7 : 'Transaction time check' */
@@ -201,6 +361,7 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
         addDeviation(transaction),
         addPercentageDifference(transaction),
         addRepeatedTransactions(transaction),
+        addCountryDifferences(transaction),
         transaction
       );
     });
@@ -215,6 +376,10 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
       return Object.assign({},
         checkOne(transaction),
         checkTwo(transaction),
+        checkThree(transaction),
+        checkFour(transaction),
+        checkFive(transaction),
+        checkSix(transaction),
         transaction
       );
     });
@@ -233,8 +398,8 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   // }
   //
   // console.log(
-  //   extractCountries(SCORED_DATA, 'issuercountrycode')
-  //     .concat(extractCountries(SCORED_DATA, 'shoppercountrycode'))
+  //   extractCountries(SCORED_DATA, 'currencycode')
+  //     .concat(extractCountries(SCORED_DATA, 'currencycode'))
   //     .sort()
   //     .filter((item, pos, ary) => !pos || item != ary[pos - 1])
   // );
@@ -242,4 +407,4 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   /* Draw chart */
 
-});
+};
