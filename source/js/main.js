@@ -142,6 +142,9 @@ function fraudeCheck(fraudData, currencyData) {
 
   const COUNTRIES_BY_EMAIL_ID = createLookupObject(fraudData, 'email_id', countCountries);
 
+  const COUNTRIES_BY_CURRENCY = createLookupObject(currencyData, 'Code', listCountries);
+
+
   /* SCALES */
   const checkOneScale = d3.scaleLinear()
                           .domain([STANDARDDEVIATION_UPPER, TRANSACTION_MAX])
@@ -289,8 +292,26 @@ function fraudeCheck(fraudData, currencyData) {
     return { checkFour: checkFourScale(COUNTRIES_BY_EMAIL_ID[transaction.email_id]) }
   }
 
+
   /* Fraud check #5 : 'Shopper country differs from issuing country and/or country of currency' */
   // independent
+  function listCountries(values) {
+    return values.map(country => country.CountryCode)
+  }
+
+  //  currencycode        vs  issuercountrycode    = currencyVsIssuerCountry
+  //  currencycode        vs  shoppercountrycode   = currencyVsShopperCountry
+  //  issuercountrycode   vs  shoppercountrycode   = IssuerCountryVsShopperCountry
+  function addCountryDifferences(transaction) {
+    return {
+      currencyVsIssuerCountry:
+        COUNTRIES_BY_CURRENCY[transaction.currencycode].indexOf(transaction.issuercountrycode) > -1,
+      currencyVsShopperCountry:
+        COUNTRIES_BY_CURRENCY[transaction.currencycode].indexOf(transaction.shoppercountrycode) > -1,
+      IssuerCountryVsShopperCountry:
+        transaction.issuercountrycode === transaction.shoppercountrycode,
+    };
+  }
 
 
   /* Fraud check #6 : 'Card number already used by other shopper (shopper email)' */
@@ -309,6 +330,7 @@ function fraudeCheck(fraudData, currencyData) {
         addDeviation(transaction),
         addPercentageDifference(transaction),
         addRepeatedTransactions(transaction),
+        addCountryDifferences(transaction),
         transaction
       );
     });
