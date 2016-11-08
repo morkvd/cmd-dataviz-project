@@ -161,6 +161,11 @@ function fraudeCheck(fraudData, currencyData) {
                           .rangeRound([0, 25])
                           .clamp(true);
 
+  const checkFiveScale = d3.scaleLinear()
+                          .domain([0, 3])
+                          .rangeRound([0, 25])
+                          .clamp(true);
+
 
   /* Fraud check #1 : 'The amount does not coincide with the average amount' */
 
@@ -313,6 +318,14 @@ function fraudeCheck(fraudData, currencyData) {
     };
   }
 
+  function checkFive(transaction) {
+    return {
+      checkFive: checkFiveScale(!transaction.currencyVsIssuerCountry +
+                                !transaction.currencyVsShopperCountry +
+                                !transaction.IssuerCountryVsShopperCountry),
+    };
+  }
+
 
   /* Fraud check #6 : 'Card number already used by other shopper (shopper email)' */
   // dependent
@@ -347,6 +360,7 @@ function fraudeCheck(fraudData, currencyData) {
         checkTwo(transaction),
         checkThree(transaction),
         checkFour(transaction),
+        checkFive(transaction),
         transaction
       );
     });
