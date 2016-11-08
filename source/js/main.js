@@ -9,7 +9,9 @@ function preProcess(transaction) {
 
 //currency country mapping from: https://gist.github.com/HarishChaudhari/4680482
 
-d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
+d3.csv('/assets/data/data.csv', preProcess, fraudeCheck);
+
+function fraudeCheck(fraudData) {
   /* Program layout
 
     1. Calculate extra fields based on fraud checks and add these to each row (transaction)
@@ -341,4 +343,4 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   /* Draw chart */
 
-});
+};
