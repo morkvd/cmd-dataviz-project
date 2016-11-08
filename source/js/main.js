@@ -127,10 +127,7 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
     "US": 10
   };
 
-  const TRANSACTIONS_BY_EMAIL = createLookupObject(fraudData, 'email_id', countCountries);
-
-  console.table(TRANSACTIONS_BY_EMAIL);
-
+  const COUNTRIES_BY_EMAIL_ID = createLookupObject(fraudData, 'email_id', countCountries);
 
   /* SCALES */
   const checkOneScale = d3.scaleLinear()
@@ -140,6 +137,11 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
 
   const checkTwoScale = d3.scaleLinear()
                           .domain([0, 10])
+                          .rangeRound([0, 25])
+                          .clamp(true);
+
+  const checkFourScale = d3.scaleLinear()
+                          .domain([1, 3])
                           .rangeRound([0, 25])
                           .clamp(true);
 
@@ -266,10 +268,13 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
   function countCountries(values) {
     return values.map(transaction => transaction.shoppercountrycode)
                  .sort()
-                 .filter((item, pos, ary) => !pos || item != ary[pos - 1])
+                 .filter((item, pos, ary) => !pos || item != ary[pos - 1]) // filter out duplicates (keep item if it is not the same as the previous item)
                  .length;
   }
 
+  function checkFour(transaction) {
+    return { checkFour: checkFourScale(COUNTRIES_BY_EMAIL_ID[transaction.email_id]) }
+  }
 
   /* Fraud check #5 : 'Shopper country differs from issuing country and/or country of currency' */
   // independent
@@ -306,6 +311,7 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
         checkOne(transaction),
         checkTwo(transaction),
         checkThree(transaction),
+        checkFour(transaction),
         transaction
       );
     });
