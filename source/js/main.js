@@ -202,6 +202,8 @@ d3.csv('/assets/data/data.csv', preProcess, function (fraudData) {
     return transaction.diffWithPrevTransaction < 900;
   }
 
+  // takes values of nested data
+  // returns amount of quickly repeating transactions
   function countRepeatedTries(values) {
     return (
       values.length === 1
