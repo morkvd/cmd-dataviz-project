@@ -3,6 +3,7 @@
 /////////////// Written by Nadieh Bremer ////////////////
 ////////////////// VisualCinnamon.com ///////////////////
 /////////// Inspired by the code of alangrafu ///////////
+///////// Converted to D3.v4 by Mark van Dijken /////////
 /////////////////////////////////////////////////////////
 
 function RadarChart(id, data, options) {
@@ -10,7 +11,7 @@ function RadarChart(id, data, options) {
 	 w: 600,				//Width of the circle
 	 h: 600,				//Height of the circle
 	 margin: {top: 20, right: 20, bottom: 20, left: 20}, //The margins of the SVG
-	 levels: 3,				//How many levels or inner circles should there be drawn
+	 levels: 5,				//How many levels or inner circles should there be drawn
 	 maxValue: 0, 			//What is the value that the biggest circle will represent
 	 labelFactor: 1.25, 	//How much farther than the radius of the outer circle should the labels be placed
 	 wrapWidth: 60, 		//The number of pixels after which a label needs to be given a new line
@@ -19,7 +20,7 @@ function RadarChart(id, data, options) {
 	 opacityCircles: 0.1, 	//The opacity of the circles of each blob
 	 strokeWidth: 2, 		//The width of the stroke around each blob
 	 roundStrokes: false,	//If true the area and stroke will follow a round path (cardinal-closed)
-	 color: d3.scale.category10()	//Color function
+	 color: d3.scaleOrdinal(d3.schemeCategory10),	//Color function
 	};
 
 	//Put all of the options into a variable called cfg
@@ -39,9 +40,9 @@ function RadarChart(id, data, options) {
 		angleSlice = Math.PI * 2 / total;		//The width in radians of each "slice"
 
 	//Scale for the radius
-	var rScale = d3.scale.linear()
+	var rScale = d3.scaleLinear()
 		.range([0, radius])
-		.domain([0, maxValue]);
+		.domain([0, 25]);
 
 	/////////////////////////////////////////////////////////
 	//////////// Create the container SVG and g /////////////
@@ -137,14 +138,10 @@ function RadarChart(id, data, options) {
 	/////////////////////////////////////////////////////////
 
 	//The radial line function
-	var radarLine = d3.svg.line.radial()
-		.interpolate("linear-closed")
+	var radarLine = d3.radialLine()
 		.radius(function(d) { return rScale(d.value); })
-		.angle(function(d,i) {	return i*angleSlice; });
-
-	if(cfg.roundStrokes) {
-		radarLine.interpolate("cardinal-closed");
-	}
+		.angle(function(d,i) {	return i*angleSlice; })
+    .curve(d3.curveLinearClosed)
 
 	//Create a wrapper for the blobs
 	var blobWrapper = g.selectAll(".radarWrapper")
