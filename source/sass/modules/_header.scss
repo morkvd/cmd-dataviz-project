@@ -1,0 +1,12 @@
+.header {
+  //background: $color-white;
+  background: linear-gradient(-20deg,#27bc9e 0%,#3eb549 71%);
+  color: $color-white;
+  box-shadow: $shadow-depth-1;
+  padding: 2rem 0;
+}
+
+.logo {
+  font-size: $font-size-h3;
+  font-weight: $font-weight-bold;
+}

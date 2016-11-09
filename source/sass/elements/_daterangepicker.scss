@@ -1,0 +1,123 @@
+.daterange {
+  display: inline-block;
+  padding: 1rem 1.5rem;
+  background: $color-off-white;
+  cursor: pointer;
+}
+
+// Overwrites
+
+.daterangepicker {
+  & table {
+    border-spacing: 0px 2px;
+  }
+
+  & td, & th {
+    border: 0;
+    width: 36px;
+    height: 36px;
+  }
+
+  & td {
+    &.active {
+      background-color: #349AEF;
+
+      &.start-date {
+        &.available {
+          &:hover {
+            border-radius: 5rem 0 0 5rem;
+          }
+
+          &.in-range {
+            &:hover {
+              border-radius: 5rem;
+            }
+          }
+
+          &.end-date {
+            &.available {
+              &:hover {
+                border-radius: 5rem;
+              }
+            }
+          }
+        }
+        &:hover {
+          //border-radius: 5rem 0 0 5rem;
+        }
+      }
+
+      &.end-date {
+        &:hover {
+          border-radius: 0 5rem 5rem 0;
+        }
+      }
+    }
+
+    &.start-date {
+      border-radius: 5rem 0 0 5rem;
+
+      &.available {
+        border-radius: 5rem 0 0 5rem;
+
+        &.in-range {
+          border-radius: 5rem;
+        }
+      }
+
+      &.end-date {
+        border-radius: 5rem;
+      }
+    }
+
+    &.end-date {
+      border-radius: 0 5rem 5rem 0;
+
+      &.in-range {
+        &.available {
+          border-radius: 0 5rem 5rem 0;
+        }
+      }
+    }
+
+    &.available {
+      border-radius: 5rem;
+
+      &:hover {
+        background: #349AEF;
+        color: $color-white;
+        border-radius: 5rem;
+      }
+
+      &.in-range {
+        border-radius: 0;
+        &:hover {
+
+        }
+      }
+    }
+
+    &.in-range {
+      background-color: #349AEF;
+      color: $color-white;
+    }
+  }
+
+  & .input-mini {
+    cursor: pointer;
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.ranges {
+  & li {
+    &.active {
+      background: #349AEF;
+    }
+  }
+}
+
+//349AEF
