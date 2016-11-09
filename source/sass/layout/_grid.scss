@@ -41,7 +41,7 @@
 }
 
 .grid-12 > [class*="col-"] {
-  font-family: "Roboto", "Helvetica Neue", Helvetica, sans-serif;
+  font-family: $font-stack-body;
   letter-spacing: normal;
   display: inline-block;
   position: relative;
