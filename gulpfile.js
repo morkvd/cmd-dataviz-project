@@ -6,7 +6,7 @@ var browserSync = require('browser-sync').create();
 var sass = require('gulp-sass');
 
 // Static Server + watching scss/html files
-gulp.task('serve', ['html', 'sass', 'js', 'data'], function() {
+gulp.task('serve', ['html', 'sass', 'js', 'images', 'data'], function() {
 
   browserSync.init({
     server: "./build"
@@ -14,6 +14,7 @@ gulp.task('serve', ['html', 'sass', 'js', 'data'], function() {
 
   gulp.watch("./source/sass/**/*.scss", ['sass']);
   gulp.watch('./source/js/*.js', ['js']);
+  gulp.watch('./source/images/**/*.*', ['images']);
   gulp.watch("./source/html/**/*.html", ['html']).on('change', browserSync.reload);
 });
 
@@ -35,13 +36,19 @@ gulp.task('sass', function() {
 
 // Move js files to build file
 gulp.task('js', function() {
-  return gulp.src("./source/js/**.*")
+  return gulp.src("./source/js/*.*")
     .pipe(gulp.dest('./build/assets/js'));
+});
+
+// Move image files to build folder
+gulp.task('images', function() {
+  return gulp.src("./source/images/**/*.*")
+    .pipe(gulp.dest('./build/assets/images'));
 });
 
 // Move data files to build file
 gulp.task('data', function() {
-  return gulp.src("./source/data/**.*")
+  return gulp.src("./source/data/*.*")
     .pipe(gulp.dest('./build/assets/data'));
 });
 
