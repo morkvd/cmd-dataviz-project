@@ -437,24 +437,24 @@ function fraudeCheck(fraudData, currencyData) {
 
   /* Calculate data required for the radar chart */
   function calculateMeanPoints(dataset) {
-    return {
-      totalMean: calculateMean(dataset.map(d => d.total)),
-      checkOneMean: calculateMean(dataset.map(d => d.checkOne)),
-      checkTwoMean: calculateMean(dataset.map(d => d.checkTwo)) ,
-      checkThreeMean: calculateMean(dataset.map(d => d.checkThree)),
-      checkFourMean: calculateMean(dataset.map(d => d.checkFour)),
-      checkFiveMean: calculateMean(dataset.map(d => d.checkFive)),
-      checkSixMean: calculateMean(dataset.map(d => d.checkSix)),
-      checkSevenMean: calculateMean(dataset.map(d => d.checkSeven)),
-
-    };
+    return [
+      { axis: 'Check One',    value: calculateMean(dataset.map(d => d.checkOne))    },
+      { axis: 'Check Two',    value: calculateMean(dataset.map(d => d.checkTwo))    },
+      { axis: 'Check Three',  value: calculateMean(dataset.map(d => d.checkThree))  },
+      { axis: 'Check Four',   value: calculateMean(dataset.map(d => d.checkFour))   },
+      { axis: 'Check Five',   value: calculateMean(dataset.map(d => d.checkFive))   },
+      { axis: 'Check Six',    value: calculateMean(dataset.map(d => d.checkSix))    },
+      { axis: 'Check Seven',  value: calculateMean(dataset.map(d => d.checkSeven))  },
+    ];
   }
 
   const fraudStats = calculateMeanPoints(TOTAL_DATA.filter(item => item.total > FRAUD_THRESHOLD));
   const legitStats = calculateMeanPoints(TOTAL_DATA.filter(item => item.total <= FRAUD_THRESHOLD));
   const totalStats = calculateMeanPoints(TOTAL_DATA);
 
-  console.table([fraudStats, legitStats, totalStats]);
+  console.table(fraudStats);
+  console.table(legitStats);
+  console.table(totalStats);
 
   // /* extract country codes from data */
   // function extractCountries(datas, key) {
