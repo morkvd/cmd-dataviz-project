@@ -173,6 +173,11 @@ function fraudeCheck(fraudData, currencyData) {
                           .rangeRound([0, 25])
                           .clamp(true);
 
+  const checkSevenScale = d3.scaleLinear()
+                          .domain([0, 12])
+                          .rangeRound([0, 25])
+                          .clamp(true);
+
 
   /* Fraud check #1 : 'The amount does not coincide with the average amount' */
 
@@ -366,6 +371,10 @@ function fraudeCheck(fraudData, currencyData) {
     };
   }
 
+  function checkSeven(transaction) {
+    return { checkSeven: checkSevenScale(12 - transaction.timeDifferenceWithPeakFraudHour) }
+  }
+
 
   /* Add aditional fraud info to transaction */
 
@@ -395,6 +404,7 @@ function fraudeCheck(fraudData, currencyData) {
         checkFour(transaction),
         checkFive(transaction),
         checkSix(transaction),
+        checkSeven(transaction),
         transaction
       );
     });
