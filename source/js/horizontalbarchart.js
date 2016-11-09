@@ -1,17 +1,15 @@
-var svg = d3.select('.horizontalbarchart').append('svg'),
-  margin = {top: 20, right: 20, bottom: 30, left: 80},
-  width = 600 - margin.left - margin.right,
-  height = 200 - margin.top - margin.bottom;
-
-var tooltip = d3.select('body').append('div').attr('class', 'toolTip');
-
-var x = d3.scaleLinear().range([0, width]);
-var y = d3.scaleBand().range([height, 0]);
-
-var g = svg.append('g')
-  .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+const svg = d3.select('.horizontalbarchart').append('svg'),
+  margin = { top: 20, right: 20, bottom: 30, left: 80 },
+  width = 743 - margin.left - margin.right,
+  height = 300 - margin.top - margin.bottom;
 
 svg.attr('width', '743').attr('height', '300');
+
+const x = d3.scaleLinear().range([0, width]);
+const y = d3.scaleBand().range([height, 0]);
+
+const g = svg.append('g')
+  .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
 d3.json('/assets/data/sampleData.json', function(error, data) {
   if (error) throw error;
@@ -37,13 +35,5 @@ d3.json('/assets/data/sampleData.json', function(error, data) {
     .attr('x', 0)
     .attr('height', y.bandwidth())
     .attr('y', function(d) { return y(d.area); })
-    .attr('width', function(d) { return x(d.value); })
-    .on('mousemove', function(d){
-      tooltip
-        .style('left', d3.event.pageX - 50 + 'px')
-        .style('top', d3.event.pageY - 70 + 'px')
-        .style('display', 'inline-block')
-        .html((d.area) + '<br>' + '£' + (d.value));
-    })
-    .on('mouseout', function(d){ tooltip.style('display', 'none');});
+    .attr('width', function(d) { return x(d.value); });
 });
