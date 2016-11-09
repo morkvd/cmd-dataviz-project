@@ -146,6 +146,7 @@ function fraudeCheck(fraudData, currencyData) {
 
   const COUNTRIES_BY_CURRENCY = createLookupObject(currencyData, 'Code', listCountries);
 
+  const FRAUD_THRESHOLD = 75;
 
   /* SCALES */
   const checkOneScale = d3.scaleLinear()
@@ -433,7 +434,27 @@ function fraudeCheck(fraudData, currencyData) {
   }
 
   const TOTAL_DATA = calculateTotalPoints(SCORED_DATA);
-  console.table(TOTAL_DATA);
+
+  /* Calculate data required for the radar chart */
+  function calculateMeanPoints(dataset) {
+    return {
+      totalMean: calculateMean(dataset.map(d => d.total)),
+      checkOneMean: calculateMean(dataset.map(d => d.checkOne)),
+      checkTwoMean: calculateMean(dataset.map(d => d.checkTwo)) ,
+      checkThreeMean: calculateMean(dataset.map(d => d.checkThree)),
+      checkFourMean: calculateMean(dataset.map(d => d.checkFour)),
+      checkFiveMean: calculateMean(dataset.map(d => d.checkFive)),
+      checkSixMean: calculateMean(dataset.map(d => d.checkSix)),
+      checkSevenMean: calculateMean(dataset.map(d => d.checkSeven)),
+
+    };
+  }
+
+  const fraudStats = calculateMeanPoints(TOTAL_DATA.filter(item => item.total > FRAUD_THRESHOLD));
+  const legitStats = calculateMeanPoints(TOTAL_DATA.filter(item => item.total <= FRAUD_THRESHOLD));
+  const totalStats = calculateMeanPoints(TOTAL_DATA);
+
+  console.table([fraudStats, legitStats, totalStats]);
 
   // /* extract country codes from data */
   // function extractCountries(datas, key) {
