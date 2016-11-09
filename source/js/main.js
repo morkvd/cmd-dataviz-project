@@ -351,6 +351,20 @@ function fraudeCheck(fraudData, currencyData) {
 
   /* Fraud check #7 : 'Transaction time check' */
   // independent
+  function addTimedifference(transaction) {
+    const transactionDate = moment.utc(transaction.creationdate);
+    const mostSuspiciousTime = moment.utc([
+      transactionDate.year(),
+      transactionDate.month(),
+      (transactionDate.hours() > 11) // if its 12 o clock or later
+        ? transactionDate.date() + 1 // compare to midnight next day
+        : transactionDate.date(),    // else compare to midnight this day
+      0, // (PS: if you change this value the value 3 lines back should also change)
+    ]);
+    return {
+      timeDifferenceWithPeakFraudHour: Math.abs(transactionDate.diff(mostSuspiciousTime, 'hours')),
+    };
+  }
 
 
   /* Add aditional fraud info to transaction */
@@ -362,6 +376,7 @@ function fraudeCheck(fraudData, currencyData) {
         addPercentageDifference(transaction),
         addRepeatedTransactions(transaction),
         addCountryDifferences(transaction),
+        addTimedifference(transaction),
         transaction
       );
     });
