@@ -1,6 +1,6 @@
 // Change check info
 
-var checkInfo = [
+const checkInfo = [
   {
     "title": "The amount does not coincide with the average amount",
     "description": "<p>Each merchant usually sells in a specific range of products. Fraudsters want to get the most out of their transactions and therefore have amounts that are much higher than the average. However, keep in mind that what is a “normal” region for amounts to be in can differ between merchants.</p>"
@@ -31,12 +31,12 @@ var checkInfo = [
   }
 ];
 
-var trigger = $('.triggerCheck');
-var checkTitle = document.getElementsByClassName('header-check');
-var checkDescription = document.getElementsByClassName('description-check');
+const trigger = $('.triggerCheck');
+const checkTitle = document.getElementsByClassName('header-check');
+const checkDescription = document.getElementsByClassName('description-check');
 
 function triggerCheck() {
-  var selectedCheck = $(this).attr('data-for').substring(6, 7) - 1;
+  const selectedCheck = $(this).attr('data-for').substring(6, 7) - 1;
   checkTitle[0].innerHTML = checkInfo[selectedCheck].title;
   checkDescription[0].innerHTML = checkInfo[selectedCheck].description;
 }
