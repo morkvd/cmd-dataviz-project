@@ -1,5 +1,5 @@
 .bar {
-  fill: #6F257F;
+  fill: $color-off-white;
 }
 .axis path,
 .axis line {
@@ -20,4 +20,8 @@
   border: 1px solid #6F257F;
   padding: 14px;
   text-align: center;
+}
+
+text {
+  font-family: $font-stack-body;
 }
