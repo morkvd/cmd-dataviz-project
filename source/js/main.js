@@ -461,7 +461,7 @@ function fraudeCheck(fraudData, currencyData) {
   //////////////////////////////////////////////////////////////
 
   var color = d3.scaleOrdinal()
-    .range(["#CC333F","#00A0B0", "#23EE99"]);
+    .range(["#CC333F", "#23EE99"]);
 
   var radarChartOptions = {
     w: 500,
@@ -474,7 +474,7 @@ function fraudeCheck(fraudData, currencyData) {
   };
 
   //Call function to draw the Radar chart
-  RadarChart('.radarChart', [fraudStats, totalStats, legitStats], radarChartOptions);
+  RadarChart('.radarChart', [fraudStats, totalStats], radarChartOptions);
 
 
   // /* extract country codes from data */
