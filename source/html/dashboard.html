@@ -19,7 +19,16 @@
                         <h4>Titel van de chart met korte uitleg</h4>
                     </div>
                     <div class="panel__body">
-                        Hier komt de chart
+                        <p>Demo om van info te wisselen</p>
+                        <ul class="triggers">
+                            <li class="triggerCheck" data-for="check-1">Trigger check 1</li>
+                            <li class="triggerCheck" data-for="check-2">Trigger check 2</li>
+                            <li class="triggerCheck" data-for="check-3">Trigger check 3</li>
+                            <li class="triggerCheck" data-for="check-4">Trigger check 4</li>
+                            <li class="triggerCheck" data-for="check-5">Trigger check 5</li>
+                            <li class="triggerCheck" data-for="check-6">Trigger check 6</li>
+                            <li class="triggerCheck" data-for="check-7">Trigger check 7</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -36,10 +45,55 @@
             <div class="col-lg-12 col-6">
                 <div class="panel">
                     <div class="panel__header">
-                        <h4>Titel van de chart met korte uitleg</h4>
+
+                        <h4 class="header-check"></h4>
+
+                        {#<h4 class="header--check1">The amount does not coincide with the average amount</h4>#}
+                        {#<h4 class="header--check2">Shopper email or card number is used in quick succession</h4>#}
+                        {#<h4 class="header--check4">Different countries used by the same shopper email address</h4>#}
+                        {#<h4 class="header--check5">Shopper country differs from issuing country and/or country of currency</h4>#}
+                        {#<h4 class="header--check6">Card number already used by other shopper (shopper email)</h4>#}
+                        {#<h4 class="header--check7">Transaction time check</h4>#}
+
                     </div>
                     <div class="panel__body">
-                        Hier komt de chart
+
+                        <div class="description-check"></div>
+
+                        {#<div class="description--check1">#}
+                            {#<p>Each merchant usually sells in a specific range of products. Fraudsters want to get the most out of their transactions and therefore have amounts that are much higher than the average. However, keep in mind that what is a “normal” region for amounts to be in can differ between merchants.</p>#}
+                        {#</div>#}
+
+                        {#<div class="description--check2">#}
+                            {#<p>Velocity checks allow merchants to set velocity thresholds on various customer attributes, controlling how often a customer can attempt transactions. These checks are intended to identify high-speed fraud attacks. To best utilize these checks merchants need to understand the behavior of their shoppers. The average number of transactions by a good user varies significantly across merchants.</p>#}
+                            {#<p>When the same email address or card number is used often within a small period, this is a good case for fraud.</p>#}
+                        {#</div>#}
+
+                        {#<div class="description--check3">#}
+                            {#<p>Some countries pose a high risk for fraud, regardless of what the country of the currency or issuing country is, such as Mexico or Bulgaria.</p>#}
+                        {#</div>#}
+
+                        {#<div class="description--check4">#}
+                            {#<p>Fraudsters often have a fraud profile that spans multiple regions. When one shopper email address or card number gets associated with multiple countries, this is an indication of possible fraud.</p>#}
+                        {#</div>#}
+
+                        {#<div class="description--check5">#}
+                            {#<p>This risk check is triggered when a transaction has the shopper country different from the issuing country (of the card) or that is different from the country from which the currency comes.</p>#}
+                        {#</div>#}
+
+                        {#<div class="description--check6">#}
+                            {#<p>Fraudsters often create multiple accounts and attempt to use the same compromised account with different techniques and attack merchants. This check is aimed at identifying when a card number is being used across multiple accounts.</p>#}
+                            {#<p>Note that there are some legitimate cases in which this would occur:</p>#}
+                            {#<ul>#}
+                                {#<li>The user may have multiple accounts.</li>#}
+                                {#<li>It may be a shared card in a family or business setting</li>#}
+                            {#</ul>#}
+                        {#</div>#}
+
+                        {#<div class="description--check7">#}
+                            {#<p>Most merchants notice that fraudsters tend to visit their site during certain parts of the day. It is not uncommon, for example, for fraud to spike during the night hours while legitimate transactions are limited.</p>#}
+                        {#</div>#}
+
                     </div>
                 </div>
             </div>
