@@ -411,7 +411,29 @@ function fraudeCheck(fraudData, currencyData) {
   }
 
   const SCORED_DATA = givePoints(ENHANCED_DATA);
-  console.table(SCORED_DATA);
+
+
+  /* Calculate total */
+  function calculateTotalPoints(scoredData) {
+    return scoredData.map(transaction => {
+      return Object.assign({},
+        {
+          total:
+            transaction.checkOne +
+            transaction.checkTwo +
+            transaction.checkThree +
+            transaction.checkFour +
+            transaction.checkFive +
+            transaction.checkSix +
+            transaction.checkSeven,
+        },
+        transaction
+      );
+    });
+  }
+
+  const TOTAL_DATA = calculateTotalPoints(SCORED_DATA);
+  console.table(TOTAL_DATA);
 
   // /* extract country codes from data */
   // function extractCountries(datas, key) {
