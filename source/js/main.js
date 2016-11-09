@@ -146,6 +146,7 @@ function fraudeCheck(fraudData, currencyData) {
 
   const COUNTRIES_BY_CURRENCY = createLookupObject(currencyData, 'Code', listCountries);
 
+  const FRAUD_THRESHOLD = 75;
 
   /* SCALES */
   const checkOneScale = d3.scaleLinear()
@@ -170,6 +171,11 @@ function fraudeCheck(fraudData, currencyData) {
 
   const checkSixScale = d3.scaleLinear()
                           .domain([1, 5])
+                          .rangeRound([0, 25])
+                          .clamp(true);
+
+  const checkSevenScale = d3.scaleLinear()
+                          .domain([0, 12])
                           .rangeRound([0, 25])
                           .clamp(true);
 
@@ -351,6 +357,24 @@ function fraudeCheck(fraudData, currencyData) {
 
   /* Fraud check #7 : 'Transaction time check' */
   // independent
+  function addTimedifference(transaction) {
+    const transactionDate = moment.utc(transaction.creationdate);
+    const mostSuspiciousTime = moment.utc([
+      transactionDate.year(),
+      transactionDate.month(),
+      (transactionDate.hours() > 11) // if its 12 o clock or later
+        ? transactionDate.date() + 1 // compare to midnight next day
+        : transactionDate.date(),    // else compare to midnight this day
+      0, // (PS: if you change this value the value 3 lines back should also change)
+    ]);
+    return {
+      timeDifferenceWithPeakFraudHour: Math.abs(transactionDate.diff(mostSuspiciousTime, 'hours')),
+    };
+  }
+
+  function checkSeven(transaction) {
+    return { checkSeven: checkSevenScale(12 - transaction.timeDifferenceWithPeakFraudHour) }
+  }
 
 
   /* Add aditional fraud info to transaction */
@@ -362,6 +386,7 @@ function fraudeCheck(fraudData, currencyData) {
         addPercentageDifference(transaction),
         addRepeatedTransactions(transaction),
         addCountryDifferences(transaction),
+        addTimedifference(transaction),
         transaction
       );
     });
@@ -380,13 +405,56 @@ function fraudeCheck(fraudData, currencyData) {
         checkFour(transaction),
         checkFive(transaction),
         checkSix(transaction),
+        checkSeven(transaction),
         transaction
       );
     });
   }
 
   const SCORED_DATA = givePoints(ENHANCED_DATA);
-  console.table(SCORED_DATA);
+
+
+  /* Calculate total */
+  function calculateTotalPoints(scoredData) {
+    return scoredData.map(transaction => {
+      return Object.assign({},
+        {
+          total:
+            transaction.checkOne +
+            transaction.checkTwo +
+            transaction.checkThree +
+            transaction.checkFour +
+            transaction.checkFive +
+            transaction.checkSix +
+            transaction.checkSeven,
+        },
+        transaction
+      );
+    });
+  }
+
+  const TOTAL_DATA = calculateTotalPoints(SCORED_DATA);
+
+  /* Calculate data required for the radar chart */
+  function calculateMeanPoints(dataset) {
+    return {
+      totalMean: calculateMean(dataset.map(d => d.total)),
+      checkOneMean: calculateMean(dataset.map(d => d.checkOne)),
+      checkTwoMean: calculateMean(dataset.map(d => d.checkTwo)) ,
+      checkThreeMean: calculateMean(dataset.map(d => d.checkThree)),
+      checkFourMean: calculateMean(dataset.map(d => d.checkFour)),
+      checkFiveMean: calculateMean(dataset.map(d => d.checkFive)),
+      checkSixMean: calculateMean(dataset.map(d => d.checkSix)),
+      checkSevenMean: calculateMean(dataset.map(d => d.checkSeven)),
+
+    };
+  }
+
+  const fraudStats = calculateMeanPoints(TOTAL_DATA.filter(item => item.total > FRAUD_THRESHOLD));
+  const legitStats = calculateMeanPoints(TOTAL_DATA.filter(item => item.total <= FRAUD_THRESHOLD));
+  const totalStats = calculateMeanPoints(TOTAL_DATA);
+
+  console.table([fraudStats, legitStats, totalStats]);
 
   // /* extract country codes from data */
   // function extractCountries(datas, key) {
