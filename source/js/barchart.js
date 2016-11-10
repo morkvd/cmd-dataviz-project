@@ -1,7 +1,5 @@
 function drawBarChart(element, data) {
 
-  console.table(data);
-
   var svg = d3.select(element),
     margin = {top: 20, right: 20, bottom: 110, left: 40},
     margin2 = {top: 430, right: 20, bottom: 30, left: 40},
@@ -53,50 +51,64 @@ function drawBarChart(element, data) {
     x2.domain(x.domain());
     y2.domain(y.domain());
 
-    focus.selectAll(".bar")
-      .data(data)
-      .enter().append("rect")
-      .attr("class", "bar")
-      .attr("x", function(d, i) { return x( i ); })
-      .attr("y", function(d) { return y(d.total); })
-      .attr("width", function() {
-        // console.log(width);
-        // console.log(data.length);
-        return width / data.length;
-      })
-      .attr("height", function(d) { return height - y(d.total); });
+  function drawBars(dataset, selection) {
+    var bars = focus.selectAll(".bar").data(dataset, datum => datum);
 
-    focus.append("g")
-      .attr("class", "axis axis--x")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis);
+    bars.exit().remove();
 
-    focus.append("g")
-      .attr("class", "axis axis--y")
-      .call(yAxis);
+    //ENTER
+    bars.enter().append("rect")
+        .attr("class", "bar enter")
+        .attr("x", function(d, i) {
+          return x( i + selection[0] );
+        })
+        .attr("y", function(d) { return y(d.total); })
+        .attr("width", function() {
+          return width / dataset.length;
+        })
+        .attr("height", function(d) { return height - y(d.total); });
 
-    context.append("path")
-      .datum(data)
-      .attr("class", "area")
-      .attr("d", area2);
 
-    context.append("g")
-      .attr("class", "axis axis--x")
-      .attr("transform", "translate(0," + height2 + ")")
-      .call(xAxis2);
 
-    context.append("g")
-      .attr("class", "brush")
-      .call(brush)
-      .call(brush.move, x.range());
+  }
+
+  drawBars(data, x2.range());
+
+  focus.append("g")
+    .attr("class", "axis axis--x")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
+
+  focus.append("g")
+    .attr("class", "axis axis--y")
+    .call(yAxis);
+
+  context.append("path")
+    .datum(data)
+    .attr("class", "area")
+    .attr("d", area2);
+
+  context.append("g")
+    .attr("class", "axis axis--x")
+    .attr("transform", "translate(0," + height2 + ")")
+    .call(xAxis2);
+
+  context.append("g")
+    .attr("class", "brush")
+    .call(brush)
+    .call(brush.move, x.range());
 
   function brushed() {
     var s = d3.event.selection || x2.range();
-    x.domain(s.map(x2.invert, x2));
+    var xs = s.map(x2.invert, x2)
+    var rounded = [Math.floor(xs[0]), Math.floor(xs[1])];
+
+    x.domain(xs);
     focus.select(".area").attr("d", area);
     focus.select(".axis--x").call(xAxis);
-    focus.selectAll(".bar")
-      .attr("x", function(d, i) { return x(i); });
+
+    drawBars(data.slice(rounded[0], rounded[1]), rounded);
+
   }
 
 }
