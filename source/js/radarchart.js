@@ -36,7 +36,7 @@ function RadarChart(id, data, options) {
 	var allAxis = (data[0].map(function(i, j){return i.axis})),	//Names of each axis
 		total = allAxis.length,					//The number of different axes
 		radius = Math.min(cfg.w/2, cfg.h/2), 	//Radius of the outermost circle
-		Format = d3.format('.4r'),			 	//Percentage formatting
+		Format = d3.format('.2f'),			 	//formatting function
 		angleSlice = Math.PI * 2 / total;		//The width in radians of each "slice"
 
 	//Scale for the radius
@@ -88,7 +88,7 @@ function RadarChart(id, data, options) {
 		.style("fill", "#CDCDCD")
 		.style("stroke", "#CDCDCD")
 		.style("fill-opacity", cfg.opacityCircles)
-		.style("filter" , "url(#glow)");
+		//.style("filter" , "url(#glow)");
 
 	//Text indicating at what % each level is
 	axisGrid.selectAll(".axisLabel")
@@ -179,8 +179,8 @@ function RadarChart(id, data, options) {
 		.attr("d", function(d,i) { return radarLine(d); })
 		.style("stroke-width", cfg.strokeWidth + "px")
 		.style("stroke", function(d,i) { return cfg.color(i); })
-		.style("fill", "none")
-		.style("filter" , "url(#glow)");
+		.style("fill", "none");
+		//.style("filter" , "url(#glow)");
 
 	//Append the circles
 	blobWrapper.selectAll(".radarCircle")
