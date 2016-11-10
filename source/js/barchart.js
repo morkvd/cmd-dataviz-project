@@ -71,13 +71,16 @@ function drawBarChart(element, data, threshold) {
     };
   };
 
-  const efficientDrawBars = debounce(drawBars, 100);
+  const efficientDrawBars = debounce(drawBars, 20);
 
 
   function drawBars(dataset, selection) {
     var bars = focus.selectAll(".bar").data(dataset, datum => datum);
     var segment = width / dataset.length;
-    var barW = (segment / 10) * 8
+    console.log(segment);
+    var tenth = (segment / 10);
+    var barW = (segment / 10) * 8;
+    console.log(barW);
 
     bars.exit().remove();
 
@@ -94,7 +97,7 @@ function drawBarChart(element, data, threshold) {
     bars.enter()
           .append("rect")
         .attr("class", "bar enter")
-        .attr("x", function(d, i) { return x( i + selection[0] ); })
+        .attr("x", function(d, i) { return x(i + selection[0]) - (barW / 2); })
         .attr("y", function(d) { return y(d.checkOne); })
         .attr("width", function() { return barW; })
         .attr("height", function(d) { return height - y(d.checkOne); });
@@ -138,14 +141,17 @@ function drawBarChart(element, data, threshold) {
   function brushed() {
     var s = d3.event.selection || x2.range();
     var xs = s.map(x2.invert, x2)
-    var rounded = [Math.floor(xs[0]), Math.floor(xs[1])];
 
     x.domain(xs);
     focus.select(".area").attr("d", area);
     focus.select(".axis--x").call(xAxis);
 
+<<<<<<< e5bdeb527561b3958da3f06c286336db6286a983
     // efficientDrawBars(data.slice(rounded[0], rounded[1]), rounded);
     drawBars(data.slice(rounded[0], rounded[1]), rounded);
+=======
+    efficientDrawBars(data.slice(xs[0], xs[1]), xs);
+>>>>>>> position bar on top of axis tics instead of between them
 
   }
 
