@@ -51,7 +51,7 @@ function drawBarChart(element, data) {
     x2.domain(x.domain());
     y2.domain(y.domain());
 
-  function drawBars(dataset) {
+  function drawBars(dataset, selection) {
     var bars = focus.selectAll(".bar").data(dataset, datum => datum);
 
     bars.exit().remove();
@@ -60,7 +60,7 @@ function drawBarChart(element, data) {
     bars.enter().append("rect")
         .attr("class", "bar enter")
         .attr("x", function(d, i) {
-          return x( i );
+          return x( i + selection[0] );
         })
         .attr("y", function(d) { return y(d.total); })
         .attr("width", function() {
@@ -72,7 +72,7 @@ function drawBarChart(element, data) {
 
   }
 
-  drawBars(data);
+  drawBars(data, x2.range());
 
   focus.append("g")
     .attr("class", "axis axis--x")
@@ -107,7 +107,7 @@ function drawBarChart(element, data) {
     focus.select(".area").attr("d", area);
     focus.select(".axis--x").call(xAxis);
 
-    drawBars(data.slice(rounded[0], rounded[1]));
+    drawBars(data.slice(rounded[0], rounded[1]), rounded);
 
   }
 
