@@ -57,7 +57,7 @@ function drawBarChart(element, data) {
       .data(data)
       .enter().append("rect")
       .attr("class", "bar")
-      .attr("x", function(d) { return x(d.txid); })
+      .attr("x", function(d, i) { return x( i ); })
       .attr("y", function(d) { return y(d.total); })
       .attr("width", function() {
         // console.log(width);
@@ -96,7 +96,7 @@ function drawBarChart(element, data) {
     focus.select(".area").attr("d", area);
     focus.select(".axis--x").call(xAxis);
     focus.selectAll(".bar")
-      .attr("x", function(d) { return x(d.txid); });
+      .attr("x", function(d, i) { return x(i); });
   }
 
 }
