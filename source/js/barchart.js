@@ -77,10 +77,8 @@ function drawBarChart(element, data, threshold) {
   function drawBars(dataset, selection) {
     var bars = focus.selectAll(".bar").data(dataset, datum => datum);
     var segment = width / dataset.length;
-    console.log(segment);
     var tenth = (segment / 10);
     var barW = (segment / 10) * 8;
-    console.log(barW);
 
     bars.exit().remove();
 
@@ -136,7 +134,7 @@ function drawBarChart(element, data, threshold) {
   context.append("g")
     .attr("class", "brush")
     .call(brush)
-    .call(brush.move, x.range());
+    .call(brush.move, [0, x.range()[1] / 3]); 
 
   function brushed() {
     var s = d3.event.selection || x2.range();
