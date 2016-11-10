@@ -1,13 +1,13 @@
 function drawBarChart(element, data) {
 
+  console.table(data);
+
   var svg = d3.select(element),
     margin = {top: 20, right: 20, bottom: 110, left: 40},
     margin2 = {top: 430, right: 20, bottom: 30, left: 40},
     width = +svg.attr("width") - margin.left - margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom,
     height2 = +svg.attr("height") - margin2.top - margin2.bottom;
-
-  console.log(+svg.attr("width"), +svg.attr("height") );
 
   var x = d3.scaleLinear().range([0, width]),
     x2 = d3.scaleLinear().range([0, width]),
@@ -24,13 +24,13 @@ function drawBarChart(element, data) {
 
   var area = d3.area()
     .curve(d3.curveMonotoneX)
-    .x(function(d) { return x(d.txid); })
+    .x(function(d, i) { return x(i); })
     .y0(height)
     .y1(function(d) { return y(d.total); });
 
   var area2 = d3.area()
     .curve(d3.curveMonotoneX)
-    .x(function(d) { return x2(d.txid); })
+    .x(function(d, i) { return x2(i); })
     .y0(height2)
     .y1(function(d) { return y2(d.total); });
 
@@ -48,7 +48,7 @@ function drawBarChart(element, data) {
     .attr("class", "context")
     .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
 
-    x.domain(d3.extent(data, function(d) { return d.txid; }));
+    x.domain(d3.extent(data, function(d, i) { return i; }));
     y.domain([0, d3.max(data, function(d) { return d.total; })]);
     x2.domain(x.domain());
     y2.domain(y.domain());
