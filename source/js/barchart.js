@@ -1,4 +1,4 @@
-function drawBarChart(element, data) {
+function drawBarChart(element, data, threshold) {
 
   var svg = d3.select(element),
     margin = {top: 20, right: 20, bottom: 110, left: 40},
@@ -53,23 +53,35 @@ function drawBarChart(element, data) {
 
   function drawBars(dataset, selection) {
     var bars = focus.selectAll(".bar").data(dataset, datum => datum);
+    var segment = width / dataset.length;
+    var barW = (segment / 10) * 8
 
     bars.exit().remove();
 
     //ENTER
-    bars.enter().append("rect")
-        .attr("class", "bar enter")
-        .attr("x", function(d, i) {
-          return x( i + selection[0] );
-        })
+    bars.enter()
+          .append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d, i) { return x( i + selection[0] ); })
         .attr("y", function(d) { return y(d.total); })
-        .attr("width", function() {
-          return width / dataset.length;
-        })
+        .attr("width", function() { return barW; })
         .attr("height", function(d) { return height - y(d.total); });
 
+    bars.enter()
+          .append("rect")
+        .attr("class", "bar enter")
+        .attr("x", function(d, i) { return x( i + selection[0] ); })
+        .attr("y", function(d) { return y(d.checkOne); })
+        .attr("width", function() { return barW; })
+        .attr("height", function(d) { return height - y(d.checkOne); });
 
-
+    focus.append('line')
+         .attr("x1", 0)
+         .attr("y1", y(threshold))
+         .attr("x2", width)
+         .attr("y2", y(threshold))
+         .attr("stroke-width", 2)
+         .attr("stroke", "#cc333f");
   }
 
   drawBars(data, x2.range());
