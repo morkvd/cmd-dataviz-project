@@ -436,21 +436,21 @@ function fraudeCheck(fraudData, currencyData) {
   const TOTAL_DATA = calculateTotalPoints(SCORED_DATA);
 
   /* Calculate data required for the radar chart */
-  function calculateMeanPoints(dataset) {
+  function calculateMeanPoints(dataset, name) {
     return [
-      { axis: 'Check One',    value: calculateMean(dataset.map(d => d.checkOne))    },
-      { axis: 'Check Two',    value: calculateMean(dataset.map(d => d.checkTwo))    },
-      { axis: 'Check Three',  value: calculateMean(dataset.map(d => d.checkThree))  },
-      { axis: 'Check Four',   value: calculateMean(dataset.map(d => d.checkFour))   },
-      { axis: 'Check Five',   value: calculateMean(dataset.map(d => d.checkFive))   },
-      { axis: 'Check Six',    value: calculateMean(dataset.map(d => d.checkSix))    },
-      { axis: 'Check Seven',  value: calculateMean(dataset.map(d => d.checkSeven))  },
+      { axis: 'Check One',    value: calculateMean(dataset.map(d => d.checkOne)), name: name    },
+      { axis: 'Check Two',    value: calculateMean(dataset.map(d => d.checkTwo)), name: name    },
+      { axis: 'Check Three',  value: calculateMean(dataset.map(d => d.checkThree)), name: name  },
+      { axis: 'Check Four',   value: calculateMean(dataset.map(d => d.checkFour)), name: name   },
+      { axis: 'Check Five',   value: calculateMean(dataset.map(d => d.checkFive)), name: name   },
+      { axis: 'Check Six',    value: calculateMean(dataset.map(d => d.checkSix)), name: name    },
+      { axis: 'Check Seven',  value: calculateMean(dataset.map(d => d.checkSeven)), name: name  },
     ];
   }
 
-  const fraudStats = calculateMeanPoints(TOTAL_DATA.filter(item => item.total > FRAUD_THRESHOLD));
-  const legitStats = calculateMeanPoints(TOTAL_DATA.filter(item => item.total <= FRAUD_THRESHOLD));
-  const totalStats = calculateMeanPoints(TOTAL_DATA);
+  const fraudStats = calculateMeanPoints(TOTAL_DATA.filter(item => item.total > FRAUD_THRESHOLD), 'fraud');
+  const legitStats = calculateMeanPoints(TOTAL_DATA.filter(item => item.total <= FRAUD_THRESHOLD), 'legit');
+  const totalStats = calculateMeanPoints(TOTAL_DATA, 'all');
 
   // draw radar chart
   const radarChartOptions = {

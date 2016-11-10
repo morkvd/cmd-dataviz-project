@@ -156,7 +156,7 @@ function RadarChart(id, data, cfg) {
 		.attr("r", cfg.dotRadius)
 		.attr("cx", function(d,i){ return rScale(d.value) * Math.cos(angleSlice*i - Math.PI/2); })
 		.attr("cy", function(d,i){ return rScale(d.value) * Math.sin(angleSlice*i - Math.PI/2); })
-		.style("fill", function(d,i,j) { return cfg.color(j); })
+		.style("fill", function(d,i,j) {return d.name === 'all' ? cfg.color(1) : cfg.color(0)})
 		.style("fill-opacity", 0.8);
 
 	/////////////////////////////////////////////////////////
