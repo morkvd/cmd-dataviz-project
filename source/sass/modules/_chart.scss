@@ -1,5 +1,9 @@
 .bar {
-  fill: $color-grey;
+  fill: #e5e5e5;
+
+  &.is-fraud {
+    fill: #e74c3c;
+  }
 }
 .axis path,
 .axis line {
@@ -27,7 +31,7 @@ text {
 }
 
 .enter {
-  fill: green;
+  fill: rgba(0, 0, 0, .4);
 }
 
 .update {
