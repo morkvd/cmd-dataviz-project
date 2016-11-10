@@ -31,17 +31,19 @@ const checkInfo = [
   }
 ];
 
-const trigger = $('.triggerCheck');
+const $trigger = $('.triggerCheck');
 const checkTitle = document.getElementsByClassName('header-check');
 const checkDescription = document.getElementsByClassName('description-check');
 
 function triggerCheck() {
+  $trigger.removeClass('is-active');
+  $(this).addClass('is-active');
   const selectedCheck = $(this).attr('data-for').substring(6, 7) - 1;
   checkTitle[0].innerHTML = checkInfo[selectedCheck].title;
   checkDescription[0].innerHTML = checkInfo[selectedCheck].description;
 }
 
-trigger.click(triggerCheck);
+$trigger.click(triggerCheck);
 
 $(function() {
   checkTitle[0].innerHTML = checkInfo[0].title;
