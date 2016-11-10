@@ -113,7 +113,7 @@ function RadarChart(id, data, cfg) {
 						.attr('y', 670)
 						.attr('font-size', '11')
 						.attr('font-family', 'Arial')
-						.text(text);
+						.text('Average fraud check score of fraudulent transactions');
 
 	areaLegend.append('rect')
 						.attr('fill', cfg.color(0))
