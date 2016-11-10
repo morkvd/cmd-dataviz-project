@@ -436,66 +436,45 @@ function fraudeCheck(fraudData, currencyData) {
   const TOTAL_DATA = calculateTotalPoints(SCORED_DATA);
 
   /* Calculate data required for the radar chart */
-  function calculateMeanPoints(dataset) {
+  function calculateMeanPoints(dataset, name) {
     return [
-      { axis: 'Check One',    value: calculateMean(dataset.map(d => d.checkOne))    },
-      { axis: 'Check Two',    value: calculateMean(dataset.map(d => d.checkTwo))    },
-      { axis: 'Check Three',  value: calculateMean(dataset.map(d => d.checkThree))  },
-      { axis: 'Check Four',   value: calculateMean(dataset.map(d => d.checkFour))   },
-      { axis: 'Check Five',   value: calculateMean(dataset.map(d => d.checkFive))   },
-      { axis: 'Check Six',    value: calculateMean(dataset.map(d => d.checkSix))    },
-      { axis: 'Check Seven',  value: calculateMean(dataset.map(d => d.checkSeven))  },
+      { axis: 'Check One',    value: calculateMean(dataset.map(d => d.checkOne)), name: name    },
+      { axis: 'Check Two',    value: calculateMean(dataset.map(d => d.checkTwo)), name: name    },
+      { axis: 'Check Three',  value: calculateMean(dataset.map(d => d.checkThree)), name: name  },
+      { axis: 'Check Four',   value: calculateMean(dataset.map(d => d.checkFour)), name: name   },
+      { axis: 'Check Five',   value: calculateMean(dataset.map(d => d.checkFive)), name: name   },
+      { axis: 'Check Six',    value: calculateMean(dataset.map(d => d.checkSix)), name: name    },
+      { axis: 'Check Seven',  value: calculateMean(dataset.map(d => d.checkSeven)), name: name  },
     ];
   }
 
-  const fraudStats = calculateMeanPoints(TOTAL_DATA.filter(item => item.total > FRAUD_THRESHOLD));
-  const legitStats = calculateMeanPoints(TOTAL_DATA.filter(item => item.total <= FRAUD_THRESHOLD));
-  const totalStats = calculateMeanPoints(TOTAL_DATA);
+  const fraudStats = calculateMeanPoints(TOTAL_DATA.filter(item => item.total > FRAUD_THRESHOLD), 'fraud');
+  const legitStats = calculateMeanPoints(TOTAL_DATA.filter(item => item.total <= FRAUD_THRESHOLD), 'legit');
+  const totalStats = calculateMeanPoints(TOTAL_DATA, 'all');
 
-  // console.table(fraudStats);
-  // console.table(legitStats);
-  // console.table(totalStats);
-
-  //////////////////////////////////////////////////////////////
-  //////////////////// Draw the Chart //////////////////////////
-  //////////////////////////////////////////////////////////////
-
-  var color = d3.scaleOrdinal()
-    .range(["#CC333F", "#23EE99"]);
-
-  var radarChartOptions = {
-    w: 500,
-    h: 500,
+  // draw radar chart
+  const radarChartOptions = {
+    w: 500, //Width of the circle
+    h: 500, //Height of the circle
     margin: {top: 100, right: 100, bottom: 100, left: 100},
+    labelFactor: 1.25, 	//How much farther than the radius of the outer circle should the labels be placed
+ 	  wrapWidth: 60, 		//The number of pixels after which a label needs to be given a new line
+ 	  opacityArea: 0.50, 	//The opacity of the area of the blob
+ 	  dotRadius: 3, 			//The size of the colored circles of each blog
+ 	  opacityCircles: 1, 	//The opacity of the circles of each blob
+ 	  strokeWidth: 2, 		//The width of the stroke around each blob
     maxValue: 25,
     levels: 5,
     roundStrokes: true,
-    color: color
+    color: d3.scaleOrdinal().range(["#CC333F", "#383838"]),
   };
 
   //Call function to draw the Radar chart
   RadarChart('.radarChart', [fraudStats, totalStats], radarChartOptions);
-  
+
   // Call function to draw horizontal bar chart
   // drawHorizontalBarChart('.horizontalbarchart', TOTAL_DATA);
   drawBarChart('.horizontalbarchart', TOTAL_DATA);
-
-
-  // /* extract country codes from data */
-  // function extractCountries(datas, key) {
-  //   let arr = [];
-  //   for (let transaction of datas) {
-  //     arr.push(transaction[key]);
-  //   }
-  //   return arr;
-  // }
-  //
-  // console.log(
-  //   extractCountries(SCORED_DATA, 'currencycode')
-  //     .concat(extractCountries(SCORED_DATA, 'currencycode'))
-  //     .sort()
-  //     .filter((item, pos, ary) => !pos || item != ary[pos - 1])
-  // );
 
 
   /* Draw chart */
