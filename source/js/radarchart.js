@@ -3,15 +3,16 @@
 /////////////// Written by Nadieh Bremer ////////////////
 ////////////////// VisualCinnamon.com ///////////////////
 /////////// Inspired by the code of alangrafu ///////////
-///////// Converted to D3.v4 by Mark van Dijken /////////
+/////////////////////////////////////////////////////////
+/// Converted to D3.v4 & modified by Mark van Dijken ////
 /////////////////////////////////////////////////////////
 
 function RadarChart(id, data, cfg) {
 
 	//If the supplied maxValue is smaller than the actual one, replace by the max in the data
-	var maxValue = Math.max(cfg.maxValue, d3.max(data, function(i){return d3.max(i.map(function(o){return o.value;}))}));
+	var maxValue = Math.max(cfg.maxValue, d3.max(data, i => d3.max(i.map(o => o.value))));
 
-	var allAxis = (data[0].map(function(i, j){return i.axis})),	//Names of each axis
+	var allAxis = (data[0].map((i, j) => i.axis)),	//Names of each axis
 		total = allAxis.length,					//The number of different axes
 		radius = Math.min(cfg.w/2, cfg.h/2), 	//Radius of the outermost circle
 		Format = d3.format('.2f'),			 	//formatting function
@@ -52,7 +53,7 @@ function RadarChart(id, data, cfg) {
 	   .enter()
 		.append("circle")
 		.attr("class", "gridCircle")
-		.attr("r", function(d, i){return radius/cfg.levels*d;})
+		.attr("r", (d, i) => radius/cfg.levels*d)
 		.style("stroke", "#CDCDCD")
 		.style("fill-opacity", 0);
 
@@ -62,11 +63,11 @@ function RadarChart(id, data, cfg) {
 	   .enter().append("text")
 	   .attr("class", "axisLabel")
 	   .attr("x", 4)
-	   .attr("y", function(d){return -d*radius/cfg.levels;})
+	   .attr("y", (d) => -d*radius/cfg.levels)
 	   .attr("dy", "0.4em")
 	   .style("font-size", "10px")
 	   .attr("fill", "#737373")
-	   .text(function(d,i) { return Format(maxValue * d/cfg.levels); });
+	   .text((d,i) => Format(maxValue * d/cfg.levels));
 
 	/////////////////////////////////////////////////////////
 	//////////////////// Draw the axes //////////////////////
@@ -82,8 +83,8 @@ function RadarChart(id, data, cfg) {
 	axis.append("line")
 		.attr("x1", 0)
 		.attr("y1", 0)
-		.attr("x2", function(d, i){ return rScale(maxValue) * Math.cos(angleSlice*i - Math.PI/2); })
-		.attr("y2", function(d, i){ return rScale(maxValue) * Math.sin(angleSlice*i - Math.PI/2); })
+		.attr("x2", (d, i) => rScale(maxValue) * Math.cos(angleSlice*i - Math.PI/2))
+		.attr("y2", (d, i) => rScale(maxValue) * Math.sin(angleSlice*i - Math.PI/2))
 		.attr("class", "line")
 		.style("stroke", "#CDCDCD")
 		.style("stroke-width", "1px")
@@ -95,9 +96,9 @@ function RadarChart(id, data, cfg) {
 		.style("font-size", "11px")
 		.attr("text-anchor", "middle")
 		.attr("dy", "0.35em")
-		.attr("x", function(d, i){ return rScale(maxValue * cfg.labelFactor) * Math.cos(angleSlice*i - Math.PI/2); })
-		.attr("y", function(d, i){ return rScale(maxValue * cfg.labelFactor) * Math.sin(angleSlice*i - Math.PI/2); })
-		.text(function(d){return d})
+		.attr("x", (d, i) => rScale(maxValue * cfg.labelFactor) * Math.cos(angleSlice*i - Math.PI/2))
+		.attr("y", (d, i) => rScale(maxValue * cfg.labelFactor) * Math.sin(angleSlice*i - Math.PI/2))
+		.text(d => d)
 		.call(wrap, cfg.wrapWidth);
 
 	/////////////////////////////////////////////////////////
@@ -106,8 +107,8 @@ function RadarChart(id, data, cfg) {
 
 	//The radial line function
 	var radarLine = d3.radialLine()
-		.radius(function(d) { return rScale(d.value); })
-		.angle(function(d,i) {	return i*angleSlice; })
+		.radius(d => rScale(d.value))
+		.angle((d,i) => i*angleSlice)
     .curve(d3.curveLinearClosed)
 
 	//Create a wrapper for the blobs
@@ -120,8 +121,8 @@ function RadarChart(id, data, cfg) {
 	blobWrapper
 		.append("path")
 		.attr("class", "radarArea")
-		.attr("d", function(d,i) { return radarLine(d); })
-		.style("fill", function(d,i) { return cfg.color(i); })
+		.attr("d", (d,i) => radarLine(d))
+		.style("fill", (d,i) => cfg.color(i))
 		.style("fill-opacity", cfg.opacityArea)
 		.on('mouseover', function (d,i){
 			//Dim all blobs
@@ -143,20 +144,20 @@ function RadarChart(id, data, cfg) {
 	//Create the outlines
 	blobWrapper.append("path")
 		.attr("class", "radarStroke")
-		.attr("d", function(d,i) { return radarLine(d); })
+		.attr("d", (d,i) => radarLine(d))
 		.style("stroke-width", cfg.strokeWidth + "px")
-		.style("stroke", function(d,i) { return cfg.color(i); })
+		.style("stroke", (d,i) => cfg.color(i))
 		.style("fill", "none");
 
 	//Append the circles
 	blobWrapper.selectAll(".radarCircle")
-		.data(function(d,i) { return d; })
+		.data((d,i) => d)
 		.enter().append("circle")
 		.attr("class", "radarCircle")
 		.attr("r", cfg.dotRadius)
-		.attr("cx", function(d,i){ return rScale(d.value) * Math.cos(angleSlice*i - Math.PI/2); })
-		.attr("cy", function(d,i){ return rScale(d.value) * Math.sin(angleSlice*i - Math.PI/2); })
-		.style("fill", function(d,i,j) {return d.name === 'all' ? cfg.color(1) : cfg.color(0)})
+		.attr("cx", (d,i) => rScale(d.value) * Math.cos(angleSlice*i - Math.PI/2))
+		.attr("cy", (d,i) => rScale(d.value) * Math.sin(angleSlice*i - Math.PI/2))
+		.style("fill", (d,i,j) => d.name === 'all' ? cfg.color(1) : cfg.color(0))
 		.style("fill-opacity", cfg.opacityCircles);
 
 	/////////////////////////////////////////////////////////
@@ -171,18 +172,17 @@ function RadarChart(id, data, cfg) {
 
 	//Append a set of invisible circles on top for the mouseover pop-up
 	blobCircleWrapper.selectAll(".radarInvisibleCircle")
-		.data(function(d,i) { return d; })
+		.data((d,i) => d)
 		.enter().append("circle")
 		.attr("class", "radarInvisibleCircle")
 		.attr("r", cfg.dotRadius*1.5)
-		.attr("cx", function(d,i){ return rScale(d.value) * Math.cos(angleSlice*i - Math.PI/2); })
-		.attr("cy", function(d,i){ return rScale(d.value) * Math.sin(angleSlice*i - Math.PI/2); })
+		.attr("cx", (d,i) => rScale(d.value) * Math.cos(angleSlice*i - Math.PI/2))
+		.attr("cy", (d,i) => rScale(d.value) * Math.sin(angleSlice*i - Math.PI/2))
 		.style("fill", "none")
 		.style("pointer-events", "all")
 		.on("mouseover", function(d,i) {
 			newX =  parseFloat(d3.select(this).attr('cx')) - 10;
 			newY =  parseFloat(d3.select(this).attr('cy')) - 10;
-
 			tooltip
 				.attr('x', newX)
 				.attr('y', newY)
