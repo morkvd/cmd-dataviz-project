@@ -477,23 +477,6 @@ function fraudeCheck(fraudData, currencyData) {
   drawBarChart('.horizontalbarchart', TOTAL_DATA);
 
 
-  // /* extract country codes from data */
-  // function extractCountries(datas, key) {
-  //   let arr = [];
-  //   for (let transaction of datas) {
-  //     arr.push(transaction[key]);
-  //   }
-  //   return arr;
-  // }
-  //
-  // console.log(
-  //   extractCountries(SCORED_DATA, 'currencycode')
-  //     .concat(extractCountries(SCORED_DATA, 'currencycode'))
-  //     .sort()
-  //     .filter((item, pos, ary) => !pos || item != ary[pos - 1])
-  // );
-
-
   /* Draw chart */
 
 };
