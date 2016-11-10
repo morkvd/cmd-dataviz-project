@@ -20,6 +20,8 @@ d3.queue()
     }
   });
 
+const FRAUD_THRESHOLD = 90;
+
 function fraudeCheck(fraudData, currencyData) {
   /* Program layout
 
@@ -145,8 +147,6 @@ function fraudeCheck(fraudData, currencyData) {
   const EMAIL_IDS_BY_CARD_ID = createLookupObject(fraudData, 'card_id', countEmailIds);
 
   const COUNTRIES_BY_CURRENCY = createLookupObject(currencyData, 'Code', listCountries);
-
-  const FRAUD_THRESHOLD = 75;
 
   /* SCALES */
   const checkOneScale = d3.scaleLinear()

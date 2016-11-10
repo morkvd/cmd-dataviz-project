@@ -85,7 +85,7 @@ function drawBarChart(element, data, threshold) {
     bars.enter()
           .append("rect")
         // .attr("class", "bar")
-        .attr("class", function(d) { return d.total < 76 ? "bar" : "bar is-fraud" })
+        .attr("class", function(d) { return d.total < FRAUD_THRESHOLD + 1 ? "bar" : "bar is-fraud" })
         .attr("x", function(d, i) { return x( i + selection[0] ); })
         .attr("y", function(d) { return y(d.total); })
         .attr("width", function() { return barW; })
