@@ -474,7 +474,7 @@ function fraudeCheck(fraudData, currencyData) {
 
   // Call function to draw horizontal bar chart
   // drawHorizontalBarChart('.horizontalbarchart', TOTAL_DATA);
-  drawBarChart('.horizontalbarchart', TOTAL_DATA.sort((left, right) => right.total - left.total));
+  drawBarChart('.horizontalbarchart', TOTAL_DATA.sort((left, right) => right.total - left.total), FRAUD_THRESHOLD);
 
 
   /* Draw chart */

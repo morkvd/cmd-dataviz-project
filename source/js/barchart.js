@@ -1,4 +1,4 @@
-function drawBarChart(element, data) {
+function drawBarChart(element, data, threshold) {
 
   var svg = d3.select(element),
     margin = {top: 20, right: 20, bottom: 110, left: 40},
@@ -51,28 +51,63 @@ function drawBarChart(element, data) {
     x2.domain(x.domain());
     y2.domain(y.domain());
 
+  // Returns a function, that, as long as it continues to be invoked, will not
+  // be triggered. The function will be called after it stops being called for
+  // N milliseconds. If `immediate` is passed, trigger the function on the
+  // leading edge, instead of the trailing.
+  // debounce function stolen from https://github.com/jashkenas/underscore/blob/master/underscore.js
+  function debounce(func, wait, immediate) {
+    var timeout;
+    return function() {
+      var context = this, args = arguments;
+      var later = function() {
+        timeout = null;
+        if (!immediate) func.apply(context, args);
+      };
+      var callNow = immediate && !timeout;
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+      if (callNow) func.apply(context, args);
+    };
+  };
+
+  const efficientDrawBars = debounce(drawBars, 100);
+
+
   function drawBars(dataset, selection) {
     var bars = focus.selectAll(".bar").data(dataset, datum => datum);
+    var segment = width / dataset.length;
+    var barW = (segment / 10) * 8
 
     bars.exit().remove();
 
     //ENTER
-    bars.enter().append("rect")
-        .attr("class", "bar enter")
-        .attr("x", function(d, i) {
-          return x( i + selection[0] );
-        })
+    bars.enter()
+          .append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d, i) { return x( i + selection[0] ); })
         .attr("y", function(d) { return y(d.total); })
-        .attr("width", function() {
-          return width / dataset.length;
-        })
+        .attr("width", function() { return barW; })
         .attr("height", function(d) { return height - y(d.total); });
 
+    bars.enter()
+          .append("rect")
+        .attr("class", "bar enter")
+        .attr("x", function(d, i) { return x( i + selection[0] ); })
+        .attr("y", function(d) { return y(d.checkOne); })
+        .attr("width", function() { return barW; })
+        .attr("height", function(d) { return height - y(d.checkOne); });
 
-
+    focus.append('line')
+         .attr("x1", 0)
+         .attr("y1", y(threshold))
+         .attr("x2", width)
+         .attr("y2", y(threshold))
+         .attr("stroke-width", 2)
+         .attr("stroke", "#cc333f");
   }
 
-  drawBars(data, x2.range());
+  efficientDrawBars(data, x2.range());
 
   focus.append("g")
     .attr("class", "axis axis--x")
@@ -107,7 +142,7 @@ function drawBarChart(element, data) {
     focus.select(".area").attr("d", area);
     focus.select(".axis--x").call(xAxis);
 
-    drawBars(data.slice(rounded[0], rounded[1]), rounded);
+    efficientDrawBars(data.slice(rounded[0], rounded[1]), rounded);
 
   }
 
