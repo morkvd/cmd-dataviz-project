@@ -102,6 +102,46 @@ function RadarChart(id, data, cfg) {
 		.call(wrap, cfg.wrapWidth);
 
 	/////////////////////////////////////////////////////////
+	////////////////////// Area Legend //////////////////////
+	/////////////////////////////////////////////////////////
+	const areaLegend = svg.append('g');
+
+	areaLegend.append('text')
+						.attr('fill', 'black')
+						.attr('text-anchor', 'start')
+						.attr('x', 400)
+						.attr('y', 670)
+						.attr('font-size', '11')
+						.attr('font-family', 'Arial')
+						.text(text);
+
+	areaLegend.append('rect')
+						.attr('fill', cfg.color(0))
+						.attr('x', 378)
+						.attr('y', 658)
+						.attr('width', '1em')
+						.attr('height', '1em')
+						.attr('opacity', '1');
+
+	areaLegend.append('text')
+						.attr('fill', 'black')
+						.attr('text-anchor', 'start')
+						.attr('x', 400)
+						.attr('y', 690)
+						.attr('font-size', '11')
+						.attr('font-family', 'Arial')
+						.text('Average fraud check score of all transactions');
+
+	areaLegend.append('rect')
+						.attr('fill', cfg.color(1))
+						.attr('x', 378)
+						.attr('y', 678)
+						.attr('width', '1em')
+						.attr('height', '1em')
+						.attr('opacity', '1');
+
+
+	/////////////////////////////////////////////////////////
 	///////////// Draw the radar chart blobs ////////////////
 	/////////////////////////////////////////////////////////
 
