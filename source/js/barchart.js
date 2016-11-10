@@ -52,14 +52,16 @@ function drawBarChart(element, data) {
     y2.domain(y.domain());
 
   function drawBars(dataset) {
-    var bars = focus.selectAll(".bar").data(dataset, datum => datum.txid);
+    var bars = focus.selectAll(".bar").data(dataset, datum => datum);
 
     bars.exit().remove();
 
     //ENTER
     bars.enter().append("rect")
         .attr("class", "bar enter")
-        .attr("x", function(d, i) { return x( i ); })
+        .attr("x", function(d, i) {
+          return x( i );
+        })
         .attr("y", function(d) { return y(d.total); })
         .attr("width", function() {
           return width / dataset.length;
