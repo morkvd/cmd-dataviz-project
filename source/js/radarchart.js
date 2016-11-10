@@ -53,9 +53,8 @@ function RadarChart(id, data, cfg) {
 		.append("circle")
 		.attr("class", "gridCircle")
 		.attr("r", function(d, i){return radius/cfg.levels*d;})
-		.style("fill", "#CDCDCD")
 		.style("stroke", "#CDCDCD")
-		.style("fill-opacity", cfg.opacityCircles);
+		.style("fill-opacity", 0);
 
 	//Text indicating at what % each level is
 	axisGrid.selectAll(".axisLabel")
@@ -83,11 +82,12 @@ function RadarChart(id, data, cfg) {
 	axis.append("line")
 		.attr("x1", 0)
 		.attr("y1", 0)
-		.attr("x2", function(d, i){ return rScale(maxValue*1.1) * Math.cos(angleSlice*i - Math.PI/2); })
-		.attr("y2", function(d, i){ return rScale(maxValue*1.1) * Math.sin(angleSlice*i - Math.PI/2); })
+		.attr("x2", function(d, i){ return rScale(maxValue) * Math.cos(angleSlice*i - Math.PI/2); })
+		.attr("y2", function(d, i){ return rScale(maxValue) * Math.sin(angleSlice*i - Math.PI/2); })
 		.attr("class", "line")
-		.style("stroke", "white")
-		.style("stroke-width", "2px");
+		.style("stroke", "#CDCDCD")
+		.style("stroke-width", "1px")
+		.style("shape-rendering", "geometricPrecision");
 
 	//Append the labels at each axis
 	axis.append("text")
