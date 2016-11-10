@@ -10,16 +10,16 @@
 function RadarChart(id, data, cfg) {
 
 	//If the supplied maxValue is smaller than the actual one, replace by the max in the data
-	var maxValue = Math.max(cfg.maxValue, d3.max(data, i => d3.max(i.map(o => o.value))));
+	const maxValue = Math.max(cfg.maxValue, d3.max(data, i => d3.max(i.map(o => o.value))));
 
-	var allAxis = (data[0].map((i, j) => i.axis)),	//Names of each axis
+	const allAxis = (data[0].map((i, j) => i.axis)),	//Names of each axis
 		total = allAxis.length,					//The number of different axes
 		radius = Math.min(cfg.w/2, cfg.h/2), 	//Radius of the outermost circle
 		Format = d3.format('.2f'),			 	//formatting function
 		angleSlice = Math.PI * 2 / total;		//The width in radians of each "slice"
 
 	//Scale for the radius
-	var rScale = d3.scaleLinear()
+	const rScale = d3.scaleLinear()
 		.range([0, radius])
 		.domain([0, 25]);
 
@@ -31,12 +31,12 @@ function RadarChart(id, data, cfg) {
 	d3.select(id).select("svg").remove();
 
 	//Initiate the radar chart SVG
-	var svg = d3.select(id).append("svg")
+	const svg = d3.select(id).append("svg")
 			.attr("width",  cfg.w + cfg.margin.left + cfg.margin.right)
 			.attr("height", cfg.h + cfg.margin.top + cfg.margin.bottom)
 			.attr("class", "radar"+id);
 	//Append a g element
-	var g = svg.append("g")
+	const g = svg.append("g")
 			.attr("transform", "translate(" + (cfg.w/2 + cfg.margin.left) + "," + (cfg.h/2 + cfg.margin.top) + ")");
 
 
@@ -45,7 +45,7 @@ function RadarChart(id, data, cfg) {
 	/////////////////////////////////////////////////////////
 
 	//Wrapper for the grid & axes
-	var axisGrid = g.append("g").attr("class", "axisWrapper");
+	const axisGrid = g.append("g").attr("class", "axisWrapper");
 
 	//Draw the background circles
 	axisGrid.selectAll(".levels")
@@ -74,7 +74,7 @@ function RadarChart(id, data, cfg) {
 	/////////////////////////////////////////////////////////
 
 	//Create the straight lines radiating outward from the center
-	var axis = axisGrid.selectAll(".axis")
+	const axis = axisGrid.selectAll(".axis")
 		.data(allAxis)
 		.enter()
 		.append("g")
@@ -106,13 +106,13 @@ function RadarChart(id, data, cfg) {
 	/////////////////////////////////////////////////////////
 
 	//The radial line function
-	var radarLine = d3.radialLine()
+	const radarLine = d3.radialLine()
 		.radius(d => rScale(d.value))
 		.angle((d,i) => i*angleSlice)
     .curve(d3.curveLinearClosed)
 
 	//Create a wrapper for the blobs
-	var blobWrapper = g.selectAll(".radarWrapper")
+	const blobWrapper = g.selectAll(".radarWrapper")
 		.data(data)
 		.enter().append("g")
 		.attr("class", "radarWrapper");
@@ -165,7 +165,7 @@ function RadarChart(id, data, cfg) {
 	/////////////////////////////////////////////////////////
 
 	//Wrapper for the invisible circles on top
-	var blobCircleWrapper = g.selectAll(".radarCircleWrapper")
+	const blobCircleWrapper = g.selectAll(".radarCircleWrapper")
 		.data(data)
 		.enter().append("g")
 		.attr("class", "radarCircleWrapper");
@@ -196,7 +196,7 @@ function RadarChart(id, data, cfg) {
 		});
 
 	//Set up the small tooltip for when you hover over a circle
-	var tooltip = g.append("text")
+	const tooltip = g.append("text")
 		.attr("class", "tooltip")
 		.style("opacity", 0);
 
@@ -208,7 +208,7 @@ function RadarChart(id, data, cfg) {
 	//Wraps SVG text
 	function wrap(text, width) {
 	  text.each(function() {
-		var text = d3.select(this),
+		let text = d3.select(this),
 			words = text.text().split(/\s+/).reverse(),
 			word,
 			line = [],
