@@ -49,8 +49,8 @@ function RadarChart(id, data, cfg) {
 
 	//Draw the background circles
 	axisGrid.selectAll(".levels")
-	   .data(d3.range(1,(cfg.levels+1)).reverse())
-	   .enter()
+		.data(d3.range(1,(cfg.levels+1)).reverse())
+		.enter()
 		.append("circle")
 		.attr("class", "gridCircle")
 		.attr("r", (d, i) => radius/cfg.levels*d)
@@ -59,15 +59,15 @@ function RadarChart(id, data, cfg) {
 
 	//Text indicating at what % each level is
 	axisGrid.selectAll(".axisLabel")
-	   .data(d3.range(1,(cfg.levels+1)).reverse())
-	   .enter().append("text")
-	   .attr("class", "axisLabel")
-	   .attr("x", 4)
-	   .attr("y", (d) => -d*radius/cfg.levels)
-	   .attr("dy", "0.4em")
-	   .style("font-size", "10px")
-	   .attr("fill", "#737373")
-	   .text((d,i) => Format(maxValue * d/cfg.levels));
+		.data(d3.range(1,(cfg.levels+1)).reverse())
+		.enter().append("text")
+		.attr("class", "axisLabel")
+		.attr("x", 4)
+		.attr("y", (d) => -d*radius/cfg.levels)
+		.attr("dy", "0.4em")
+		.style("font-size", "10px")
+		.attr("fill", "#737373")
+		.text((d,i) => Format(maxValue * d/cfg.levels));
 
 	/////////////////////////////////////////////////////////
 	//////////////////// Draw the axes //////////////////////
@@ -208,27 +208,27 @@ function RadarChart(id, data, cfg) {
 	//Wraps SVG text
 	function wrap(text, width) {
 	  text.each(function() {
-		let text = d3.select(this),
-			words = text.text().split(/\s+/).reverse(),
-			word,
-			line = [],
-			lineNumber = 0,
-			lineHeight = 1.4, // ems
-			y = text.attr("y"),
-			x = text.attr("x"),
-			dy = parseFloat(text.attr("dy")),
-			tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em");
+			let text = d3.select(this),
+				words = text.text().split(/\s+/).reverse(),
+				word,
+				line = [],
+				lineNumber = 0,
+				lineHeight = 1.4, // ems
+				y = text.attr("y"),
+				x = text.attr("x"),
+				dy = parseFloat(text.attr("dy")),
+				tspan = text.text(null).append("tspan").attr("x", x).attr("y", y).attr("dy", dy + "em");
 
-		while (word = words.pop()) {
-		  line.push(word);
-		  tspan.text(line.join(" "));
-		  if (tspan.node().getComputedTextLength() > width) {
-			line.pop();
-			tspan.text(line.join(" "));
-			line = [word];
-			tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
-		  }
-		}
+			while (word = words.pop()) {
+			  line.push(word);
+			  tspan.text(line.join(" "));
+			  if (tspan.node().getComputedTextLength() > width) {
+				line.pop();
+				tspan.text(line.join(" "));
+				line = [word];
+				tspan = text.append("tspan").attr("x", x).attr("y", y).attr("dy", ++lineNumber * lineHeight + dy + "em").text(word);
+			  }
+			}
 	  });
 	}//wrap
 
