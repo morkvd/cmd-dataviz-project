@@ -60,16 +60,6 @@ function RadarChart(id, data, options) {
 	var g = svg.append("g")
 			.attr("transform", "translate(" + (cfg.w/2 + cfg.margin.left) + "," + (cfg.h/2 + cfg.margin.top) + ")");
 
-	/////////////////////////////////////////////////////////
-	////////// Glow filter for some extra pizzazz ///////////
-	/////////////////////////////////////////////////////////
-
-	//Filter for the outside glow
-	var filter = g.append('defs').append('filter').attr('id','glow'),
-		feGaussianBlur = filter.append('feGaussianBlur').attr('stdDeviation','2.5').attr('result','coloredBlur'),
-		feMerge = filter.append('feMerge'),
-		feMergeNode_1 = feMerge.append('feMergeNode').attr('in','coloredBlur'),
-		feMergeNode_2 = feMerge.append('feMergeNode').attr('in','SourceGraphic');
 
 	/////////////////////////////////////////////////////////
 	/////////////// Draw the Circular grid //////////////////
@@ -87,8 +77,7 @@ function RadarChart(id, data, options) {
 		.attr("r", function(d, i){return radius/cfg.levels*d;})
 		.style("fill", "#CDCDCD")
 		.style("stroke", "#CDCDCD")
-		.style("fill-opacity", cfg.opacityCircles)
-		//.style("filter" , "url(#glow)");
+		.style("fill-opacity", cfg.opacityCircles);
 
 	//Text indicating at what % each level is
 	axisGrid.selectAll(".axisLabel")
@@ -180,7 +169,6 @@ function RadarChart(id, data, options) {
 		.style("stroke-width", cfg.strokeWidth + "px")
 		.style("stroke", function(d,i) { return cfg.color(i); })
 		.style("fill", "none");
-		//.style("filter" , "url(#glow)");
 
 	//Append the circles
 	blobWrapper.selectAll(".radarCircle")
