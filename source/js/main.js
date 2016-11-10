@@ -452,9 +452,9 @@ function fraudeCheck(fraudData, currencyData) {
   const legitStats = calculateMeanPoints(TOTAL_DATA.filter(item => item.total <= FRAUD_THRESHOLD));
   const totalStats = calculateMeanPoints(TOTAL_DATA);
 
-  console.table(fraudStats);
-  console.table(legitStats);
-  console.table(totalStats);
+  // console.table(fraudStats);
+  // console.table(legitStats);
+  // console.table(totalStats);
 
   //////////////////////////////////////////////////////////////
   //////////////////// Draw the Chart //////////////////////////
@@ -475,6 +475,10 @@ function fraudeCheck(fraudData, currencyData) {
 
   //Call function to draw the Radar chart
   RadarChart('.radarChart', [fraudStats, totalStats], radarChartOptions);
+  
+  // Call function to draw horizontal bar chart
+  // drawHorizontalBarChart('.horizontalbarchart', TOTAL_DATA);
+  drawBarChart('.horizontalbarchart', TOTAL_DATA);
 
 
   // /* extract country codes from data */
