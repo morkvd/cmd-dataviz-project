@@ -108,7 +108,8 @@ function drawBarChart(element, data, threshold) {
          .attr("stroke", "#cc333f");
   }
 
-  efficientDrawBars(data, x2.range());
+  // efficientDrawBars(data, x2.range());
+  drawBars(data, x2.range());
 
   focus.append("g")
     .attr("class", "axis axis--x")
@@ -143,7 +144,8 @@ function drawBarChart(element, data, threshold) {
     focus.select(".area").attr("d", area);
     focus.select(".axis--x").call(xAxis);
 
-    efficientDrawBars(data.slice(rounded[0], rounded[1]), rounded);
+    // efficientDrawBars(data.slice(rounded[0], rounded[1]), rounded);
+    drawBars(data.slice(rounded[0], rounded[1]), rounded);
 
   }
 
