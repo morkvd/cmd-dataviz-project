@@ -459,14 +459,14 @@ function fraudeCheck(fraudData, currencyData) {
     margin: {top: 100, right: 100, bottom: 100, left: 100},
     labelFactor: 1.25, 	//How much farther than the radius of the outer circle should the labels be placed
  	  wrapWidth: 60, 		//The number of pixels after which a label needs to be given a new line
- 	  opacityArea: 0.35, 	//The opacity of the area of the blob
+ 	  opacityArea: 0.20, 	//The opacity of the area of the blob
  	  dotRadius: 4, 			//The size of the colored circles of each blog
- 	  opacityCircles: 0.1, 	//The opacity of the circles of each blob
+ 	  opacityCircles: 1, 	//The opacity of the circles of each blob
  	  strokeWidth: 2, 		//The width of the stroke around each blob
     maxValue: 25,
     levels: 5,
     roundStrokes: true,
-    color: d3.scaleOrdinal().range(["#CC333F", "#23EE99"]),
+    color: d3.scaleOrdinal().range(["#CC333F", "#3eb549"]),
   };
 
   //Call function to draw the Radar chart
