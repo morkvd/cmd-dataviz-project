@@ -7,6 +7,8 @@ function drawBarChart(element, data) {
     height = +svg.attr("height") - margin.top - margin.bottom,
     height2 = +svg.attr("height") - margin2.top - margin2.bottom;
 
+  console.log(+svg.attr("width"), +svg.attr("height") );
+
   var x = d3.scaleLinear().range([0, width]),
     x2 = d3.scaleLinear().range([0, width]),
     y = d3.scaleLinear().range([height, 0]),
