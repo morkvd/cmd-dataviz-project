@@ -1,16 +1,14 @@
 function drawBarChart(element, data) {
 
-  var svg = d3.select(".horizontalbarchart"),
+  var svg = d3.select(element),
     margin = {top: 20, right: 20, bottom: 110, left: 40},
     margin2 = {top: 430, right: 20, bottom: 30, left: 40},
     width = +svg.attr("width") - margin.left - margin.right,
     height = +svg.attr("height") - margin.top - margin.bottom,
     height2 = +svg.attr("height") - margin2.top - margin2.bottom;
 
-  var parseDate = d3.timeParse("%Y-%m");
-
-  var x = d3.scaleTime().range([0, width]),
-    x2 = d3.scaleTime().range([0, width]),
+  var x = d3.scaleLinear().range([0, width]),
+    x2 = d3.scaleLinear().range([0, width]),
     y = d3.scaleLinear().range([height, 0]),
     y2 = d3.scaleLinear().range([height2, 0]);
 
@@ -59,7 +57,11 @@ function drawBarChart(element, data) {
       .attr("class", "bar")
       .attr("x", function(d) { return x(d.txid); })
       .attr("y", function(d) { return y(d.total); })
-      .attr("width", width / data.length - 2)
+      .attr("width", function() {
+        // console.log(width);
+        // console.log(data.length);
+        return width / data.length;
+      })
       .attr("height", function(d) { return height - y(d.total); });
 
     focus.append("g")
