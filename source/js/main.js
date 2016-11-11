@@ -479,17 +479,4 @@ function fraudeCheck(fraudData, currencyData) {
 
   /* Draw chart */
 
-  // Panels
-
-  const totalFraudulentPayment = TOTAL_DATA.filter((d) => d.total > FRAUD_THRESHOLD) .length;
-  const percentageFraud = (totalFraudulentPayment / TOTAL_DATA.length * 100).toFixed(2);
-
-  const $percentageFraudElement = $('.percentageFraud');
-  $percentageFraudElement.html(percentageFraud + '%');
-
-  const totalTransactions = TOTAL_DATA.length;
-
-  const $totalTransactionsElement = $('.totalTransactions');
-  $totalTransactionsElement.html(totalTransactions);
-
 };

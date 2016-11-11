@@ -45,6 +45,26 @@ let CURRENTLY_SELECTED_CHECK = checkInfo[0].check; // barchart.js looks at this 
                                                    // terrible code, too tired to care
 function drawBarChart(element, data, threshold) {
 
+  // Panels
+
+  const totalFraudulentPayments = data.filter((d) => d.total > FRAUD_THRESHOLD);
+  const percentageFraud = (totalFraudulentPayments.length / data.length * 100).toFixed(2);
+
+  const $percentageFraudElement = $('.percentageFraud');
+  $percentageFraudElement.html(percentageFraud + '%');
+
+  const totalTransactions = data.length;
+
+  const $totalTransactionsElement = $('.totalTransactions');
+  $totalTransactionsElement.html(totalTransactions);
+
+  const totalFraudulentPaymentPoints = totalFraudulentPayments.map(d => d.total).reduce((a, b) => a + b, 0);
+
+  let totalPointsSelectedCheck = totalFraudulentPayments.map(d => d[CURRENTLY_SELECTED_CHECK]).reduce((a, b) => a + b, 0);
+  let percentagePointsSelectedCheck = (totalPointsSelectedCheck / totalFraudulentPaymentPoints * 100).toFixed(2);
+  const $percentagePointsElement = $('.percentagePoints');
+  $percentagePointsElement.html(percentagePointsSelectedCheck + '%');
+
   var svg = d3.select(element),
     margin = {top: 20, right: 20, bottom: 110, left: 40},
     margin2 = {top: 430, right: 20, bottom: 30, left: 40},
@@ -188,6 +208,12 @@ function drawBarChart(element, data, threshold) {
     CURRENTLY_SELECTED_CHECK = checkInfo[selectedCheck].check;
     drawBars(data, x2.range());
     d3.select('.brush').call(brush.move, [0, s[1]]);
+
+
+    let totalPointsSelectedCheck = totalFraudulentPayments.map(d => d[CURRENTLY_SELECTED_CHECK]).reduce((a, b) => a + b, 0);
+    let percentagePointsSelectedCheck = (totalPointsSelectedCheck / totalFraudulentPaymentPoints * 100).toFixed(2);
+    $percentagePointsElement.html(percentagePointsSelectedCheck + '%');
+
   }
 
   drawBars(data, x2.range());
