@@ -71,8 +71,7 @@ function drawBarChart(element, data, threshold) {
     };
   };
 
-  const efficientDrawBars = debounce(drawBars, 20);
-
+  const efficientDrawBars = debounce(drawBars, 10);
 
   function drawBars(dataset, selection) {
     var bars = focus.selectAll(".bar").data(dataset, datum => datum);
@@ -134,13 +133,28 @@ function drawBarChart(element, data, threshold) {
   context.append("g")
     .attr("class", "brush")
     .call(brush)
-    .call(brush.move, [0, x.range()[1] / 3]); 
+    .call(brush.move, [0, x.range()[1] / 3]);
 
   function brushed() {
-    var s = d3.event.selection || x2.range();
+    var selectedRange = d3.event.selection;
+    var selectedRangeWidth = Math.abs(d3.event.selection[0] - d3.event.selection[1]);
+    var minSelectionWidth = 15;
+    if (selectedRangeWidth < minSelectionWidth) {
+      selectedRange = [selectedRange[0], selectedRange[0] + minSelectionWidth];
+    }
+    var s = selectedRange || x2.range();
     var xs = s.map(x2.invert, x2)
 
     x.domain(xs);
+
+
+    // from Programmatically Control a d3 brush
+    // http://bl.ocks.org/timelyportfolio/5c136de85de1c2abb6fc
+    if (!d3.event.sourceEvent) return; // Only transition after input.
+    if (!d3.event.selection) return; // Ignore empty selections.
+    d3.select(this).transition().call(d3.event.target.move, selectedRange);
+
+
     focus.select(".area").attr("d", area);
     focus.select(".axis--x").call(xAxis);
 
