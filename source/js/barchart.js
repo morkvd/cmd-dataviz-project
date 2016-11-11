@@ -1,5 +1,3 @@
-
-
 // Change check info
 
 const checkInfo = [
@@ -45,8 +43,6 @@ const checkTitle = document.getElementsByClassName('header-check');
 const checkDescription = document.getElementsByClassName('description-check');
 let CURRENTLY_SELECTED_CHECK = checkInfo[0].check; // barchart.js looks at this to see what check is active
                                                    // terrible code, too tired to care
-
-
 function drawBarChart(element, data, threshold) {
 
   var svg = d3.select(element),
@@ -135,6 +131,8 @@ function drawBarChart(element, data, threshold) {
          .attr("stroke", "#cc333f");
   }
 
+  var s = x2.range();
+
   function triggerCheck() {
     $trigger.removeClass('is-active');
     $(this).addClass('is-active');
@@ -142,8 +140,8 @@ function drawBarChart(element, data, threshold) {
     checkTitle[0].innerHTML = checkInfo[selectedCheck].title;
     checkDescription[0].innerHTML = checkInfo[selectedCheck].description;
     CURRENTLY_SELECTED_CHECK = checkInfo[selectedCheck].check;
-    // drawBarChart('.horizontalbarchart', TOTAL_DATA.sort((left, right) => right.total - left.total), FRAUD_THRESHOLD);
     drawBars(data, x2.range());
+    d3.select('.brush').call(brush.move, [0, s[1]]);
   }
 
   drawBars(data, x2.range());
@@ -179,7 +177,7 @@ function drawBarChart(element, data, threshold) {
     if (selectedRangeWidth < minSelectionWidth) {
       selectedRange = [selectedRange[0], selectedRange[0] + minSelectionWidth];
     }
-    var s = selectedRange || x2.range();
+    s = selectedRange || x2.range();
     var xs = s.map(x2.invert, x2);
 
     x.domain(xs);
