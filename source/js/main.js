@@ -466,7 +466,7 @@ function fraudeCheck(fraudData, currencyData) {
     maxValue: 25,
     levels: 5,
     roundStrokes: true,
-    color: d3.scaleOrdinal().range(["#CC333F", "#383838"]),
+    color: d3.scaleOrdinal().range(["#e74c3c", "#444"]),
   };
 
   //Call function to draw the Radar chart
