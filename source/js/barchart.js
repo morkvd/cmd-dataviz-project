@@ -51,28 +51,6 @@ function drawBarChart(element, data, threshold) {
     x2.domain(x.domain());
     y2.domain(y.domain());
 
-  // Returns a function, that, as long as it continues to be invoked, will not
-  // be triggered. The function will be called after it stops being called for
-  // N milliseconds. If `immediate` is passed, trigger the function on the
-  // leading edge, instead of the trailing.
-  // debounce function stolen from https://github.com/jashkenas/underscore/blob/master/underscore.js
-  function debounce(func, wait, immediate) {
-    var timeout;
-    return function() {
-      var context = this, args = arguments;
-      var later = function() {
-        timeout = null;
-        if (!immediate) func.apply(context, args);
-      };
-      var callNow = immediate && !timeout;
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-      if (callNow) func.apply(context, args);
-    };
-  };
-
-  const efficientDrawBars = debounce(drawBars, 10);
-
   function drawBars(dataset, selection) {
     var bars = focus.selectAll(".bar").data(dataset, datum => datum);
     var segment = width / dataset.length;
@@ -108,7 +86,6 @@ function drawBarChart(element, data, threshold) {
          .attr("stroke", "#cc333f");
   }
 
-  // efficientDrawBars(data, x2.range());
   drawBars(data, x2.range());
 
   focus.append("g")
@@ -158,12 +135,7 @@ function drawBarChart(element, data, threshold) {
     focus.select(".area").attr("d", area);
     focus.select(".axis--x").call(xAxis);
 
-<<<<<<< e5bdeb527561b3958da3f06c286336db6286a983
-    // efficientDrawBars(data.slice(rounded[0], rounded[1]), rounded);
-    drawBars(data.slice(rounded[0], rounded[1]), rounded);
-=======
-    efficientDrawBars(data.slice(xs[0], xs[1]), xs);
->>>>>>> position bar on top of axis tics instead of between them
+    drawBars(data.slice(xs[0], xs[1]), xs);
 
   }
 
