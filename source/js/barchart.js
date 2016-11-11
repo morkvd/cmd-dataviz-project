@@ -1,4 +1,5 @@
 function drawBarChart(element, data, threshold) {
+  console.table(data)
 
   var svg = d3.select(element),
     margin = {top: 20, right: 20, bottom: 110, left: 40},
@@ -69,13 +70,15 @@ function drawBarChart(element, data, threshold) {
         .attr("width", function() { return barW; })
         .attr("height", function(d) { return height - y(d.total); });
 
+    console.log(CURRENTLY_SELECTED_CHECK);
+
     bars.enter()
           .append("rect")
         .attr("class", "bar enter")
         .attr("x", function(d, i) { return x(i + selection[0]) - (barW / 2); })
-        .attr("y", function(d) { return y(d.checkOne); })
+        .attr("y", function(d) { return y(d[CURRENTLY_SELECTED_CHECK]); }) // CURRENTLY_SELECTED_CHECK is defined in triggercheck.js
         .attr("width", function() { return barW; })
-        .attr("height", function(d) { return height - y(d.checkOne); });
+        .attr("height", function(d) { console.log(d[CURRENTLY_SELECTED_CHECK]); return height - y(d[CURRENTLY_SELECTED_CHECK]); });
 
     focus.append('line')
          .attr("x1", 0)
