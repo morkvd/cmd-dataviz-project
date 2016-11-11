@@ -1,4 +1,5 @@
 function drawBarChart(element, data, threshold) {
+  console.table(data)
 
   var svg = d3.select(element),
     margin = {top: 20, right: 20, bottom: 110, left: 40},
@@ -51,33 +52,11 @@ function drawBarChart(element, data, threshold) {
     x2.domain(x.domain());
     y2.domain(y.domain());
 
-  // Returns a function, that, as long as it continues to be invoked, will not
-  // be triggered. The function will be called after it stops being called for
-  // N milliseconds. If `immediate` is passed, trigger the function on the
-  // leading edge, instead of the trailing.
-  // debounce function stolen from https://github.com/jashkenas/underscore/blob/master/underscore.js
-  function debounce(func, wait, immediate) {
-    var timeout;
-    return function() {
-      var context = this, args = arguments;
-      var later = function() {
-        timeout = null;
-        if (!immediate) func.apply(context, args);
-      };
-      var callNow = immediate && !timeout;
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-      if (callNow) func.apply(context, args);
-    };
-  };
-
-  const efficientDrawBars = debounce(drawBars, 100);
-
-
   function drawBars(dataset, selection) {
     var bars = focus.selectAll(".bar").data(dataset, datum => datum);
     var segment = width / dataset.length;
-    var barW = (segment / 10) * 8
+    var tenth = (segment / 10);
+    var barW = (segment / 10) * 8;
 
     bars.exit().remove();
 
@@ -86,18 +65,20 @@ function drawBarChart(element, data, threshold) {
           .append("rect")
         // .attr("class", "bar")
         .attr("class", function(d) { return d.total < FRAUD_THRESHOLD + 1 ? "bar" : "bar is-fraud" })
-        .attr("x", function(d, i) { return x( i + selection[0] ); })
+        .attr("x", function(d, i) { return x( i + selection[0] ) - (barW / 2); })
         .attr("y", function(d) { return y(d.total); })
         .attr("width", function() { return barW; })
         .attr("height", function(d) { return height - y(d.total); });
 
+    console.log(CURRENTLY_SELECTED_CHECK);
+
     bars.enter()
           .append("rect")
         .attr("class", "bar enter")
-        .attr("x", function(d, i) { return x( i + selection[0] ); })
-        .attr("y", function(d) { return y(d.checkOne); })
+        .attr("x", function(d, i) { return x(i + selection[0]) - (barW / 2); })
+        .attr("y", function(d) { return y(d[CURRENTLY_SELECTED_CHECK]); }) // CURRENTLY_SELECTED_CHECK is defined in triggercheck.js
         .attr("width", function() { return barW; })
-        .attr("height", function(d) { return height - y(d.checkOne); });
+        .attr("height", function(d) { console.log(d[CURRENTLY_SELECTED_CHECK]); return height - y(d[CURRENTLY_SELECTED_CHECK]); });
 
     focus.append('line')
          .attr("x1", 0)
@@ -108,7 +89,6 @@ function drawBarChart(element, data, threshold) {
          .attr("stroke", "#cc333f");
   }
 
-  // efficientDrawBars(data, x2.range());
   drawBars(data, x2.range());
 
   focus.append("g")
@@ -133,19 +113,32 @@ function drawBarChart(element, data, threshold) {
   context.append("g")
     .attr("class", "brush")
     .call(brush)
-    .call(brush.move, x.range());
+    .call(brush.move, [0, x.range()[1] / 3]);
 
   function brushed() {
-    var s = d3.event.selection || x2.range();
+    var selectedRange = d3.event.selection;
+    var selectedRangeWidth = Math.abs(d3.event.selection[0] - d3.event.selection[1]);
+    var minSelectionWidth = 15;
+    if (selectedRangeWidth < minSelectionWidth) {
+      selectedRange = [selectedRange[0], selectedRange[0] + minSelectionWidth];
+    }
+    var s = selectedRange || x2.range();
     var xs = s.map(x2.invert, x2)
-    var rounded = [Math.floor(xs[0]), Math.floor(xs[1])];
 
     x.domain(xs);
+
+
+    // from Programmatically Control a d3 brush
+    // http://bl.ocks.org/timelyportfolio/5c136de85de1c2abb6fc
+    if (!d3.event.sourceEvent) return; // Only transition after input.
+    if (!d3.event.selection) return; // Ignore empty selections.
+    d3.select(this).transition().call(d3.event.target.move, selectedRange);
+
+
     focus.select(".area").attr("d", area);
     focus.select(".axis--x").call(xAxis);
 
-    // efficientDrawBars(data.slice(rounded[0], rounded[1]), rounded);
-    drawBars(data.slice(rounded[0], rounded[1]), rounded);
+    drawBars(data.slice(xs[0], xs[1]), xs);
 
   }
 
