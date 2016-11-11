@@ -128,7 +128,53 @@ function drawBarChart(element, data, threshold) {
          .attr("x2", width)
          .attr("y2", y(threshold))
          .attr("stroke-width", 2)
-         .attr("stroke", "#cc333f");
+         .attr("shape-rendering", "crispEdges")
+         .attr("stroke", "#aa111f");
+
+    focus.append('rect')
+         .attr("x", width - 112)
+         .attr("y", y(threshold) - 16)
+         .attr("height", "1em")
+         .attr("width", 100)
+         .attr("shape-rendering", "crispEdges")
+         .attr('fill', '#FFFFFF')
+
+    focus.append('text')
+         .attr("x", width - 20)
+         .attr("y", y(threshold) - 4)
+         .attr("shape-rendering", "crispEdges")
+         .attr('fill', '#222')
+         .attr('text-anchor', 'end')
+         .attr('font-size', '12')
+         .attr('font-family', 'Arial')
+         .text('Fraud threshold');
+
+    focus.append('line')
+         .attr("x1", 0)
+         .attr("y1", y(25))
+         .attr("x2", width)
+         .attr("y2", y(25))
+         .attr("stroke-width", 2)
+         .attr("shape-rendering", "crispEdges")
+         .attr("stroke", "#222");
+
+    focus.append('rect')
+         .attr("x", width - 80)
+         .attr("y", y(25) - 16)
+         .attr("height", "1em")
+         .attr("width", 68)
+         .attr("shape-rendering", "crispEdges")
+         .attr('fill', '#FFFFFF')
+
+    focus.append('text')
+         .attr("x", width - 20)
+         .attr("y", y(25) - 4)
+         .attr("shape-rendering", "crispEdges")
+         .attr('fill', '#222')
+         .attr('text-anchor', 'end')
+         .attr('font-size', '12')
+         .attr('font-family', 'Arial')
+         .text('Max score');
   }
 
   var s = x2.range();
