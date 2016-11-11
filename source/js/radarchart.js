@@ -109,16 +109,16 @@ function RadarChart(id, data, cfg) {
 	areaLegend.append('text')
 						.attr('fill', 'black')
 						.attr('text-anchor', 'start')
-						.attr('x', 400)
-						.attr('y', 670)
+						.attr('x', 460)
+						.attr('y', 11)
 						.attr('font-size', '11')
 						.attr('font-family', 'Arial')
 						.text('Average fraud check score of fraudulent transactions');
 
 	areaLegend.append('rect')
 						.attr('fill', cfg.color(0))
-						.attr('x', 378)
-						.attr('y', 658)
+						.attr('x', 438)
+						.attr('y', 0)
 						.attr('width', '1em')
 						.attr('height', '1em')
 						.attr('opacity', '1');
@@ -126,16 +126,16 @@ function RadarChart(id, data, cfg) {
 	areaLegend.append('text')
 						.attr('fill', 'black')
 						.attr('text-anchor', 'start')
-						.attr('x', 400)
-						.attr('y', 690)
+						.attr('x', 460)
+						.attr('y', 32)
 						.attr('font-size', '11')
 						.attr('font-family', 'Arial')
 						.text('Average fraud check score of all transactions');
 
 	areaLegend.append('rect')
 						.attr('fill', cfg.color(1))
-						.attr('x', 378)
-						.attr('y', 678)
+						.attr('x', 438)
+						.attr('y', 20)
 						.attr('width', '1em')
 						.attr('height', '1em')
 						.attr('opacity', '1');

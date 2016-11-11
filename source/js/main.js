@@ -438,13 +438,13 @@ function fraudeCheck(fraudData, currencyData) {
   /* Calculate data required for the radar chart */
   function calculateMeanPoints(dataset, name) {
     return [
-      { axis: 'Check One',    value: calculateMean(dataset.map(d => d.checkOne)), name: name    },
-      { axis: 'Check Two',    value: calculateMean(dataset.map(d => d.checkTwo)), name: name    },
-      { axis: 'Check Three',  value: calculateMean(dataset.map(d => d.checkThree)), name: name  },
-      { axis: 'Check Four',   value: calculateMean(dataset.map(d => d.checkFour)), name: name   },
-      { axis: 'Check Five',   value: calculateMean(dataset.map(d => d.checkFive)), name: name   },
-      { axis: 'Check Six',    value: calculateMean(dataset.map(d => d.checkSix)), name: name    },
-      { axis: 'Check Seven',  value: calculateMean(dataset.map(d => d.checkSeven)), name: name  },
+      { axis: 'Amount',    value: calculateMean(dataset.map(d => d.checkOne)), name: name    },
+      { axis: 'Email or card number',    value: calculateMean(dataset.map(d => d.checkTwo)), name: name    },
+      { axis: 'Shopper country risk',  value: calculateMean(dataset.map(d => d.checkThree)), name: name  },
+      { axis: 'Multiple countries associated with email/card',   value: calculateMean(dataset.map(d => d.checkFour)), name: name   },
+      { axis: 'Country difference',   value: calculateMean(dataset.map(d => d.checkFive)), name: name   },
+      { axis: 'Card number reused',    value: calculateMean(dataset.map(d => d.checkSix)), name: name    },
+      { axis: 'Transaction time',  value: calculateMean(dataset.map(d => d.checkSeven)), name: name  },
     ];
   }
 
@@ -454,9 +454,9 @@ function fraudeCheck(fraudData, currencyData) {
 
   // draw radar chart
   const radarChartOptions = {
-    w: 500, //Width of the circle
+    w: 543, //Width of the circle
     h: 500, //Height of the circle
-    margin: {top: 100, right: 100, bottom: 100, left: 100},
+    margin: {top: 117, right: 100, bottom: 100, left: 100},
     labelFactor: 1.25, 	//How much farther than the radius of the outer circle should the labels be placed
  	  wrapWidth: 60, 		//The number of pixels after which a label needs to be given a new line
  	  opacityArea: 0.50, 	//The opacity of the area of the blob
