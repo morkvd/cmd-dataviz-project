@@ -51,6 +51,8 @@ function triggerCheck() {
   checkTitle[0].innerHTML = checkInfo[selectedCheck].title;
   checkDescription[0].innerHTML = checkInfo[selectedCheck].description;
   CURRENTLY_SELECTED_CHECK = checkInfo[selectedCheck].check;
+  drawBarChart('.horizontalbarchart', TOTAL_DATA.sort((left, right) => right.total - left.total), FRAUD_THRESHOLD);
+  // drawBars();
 }
 
 $trigger.click(triggerCheck);
