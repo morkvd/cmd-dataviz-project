@@ -20,6 +20,8 @@ d3.queue()
     }
   });
 
+const FRAUD_THRESHOLD = 90;
+
 function fraudeCheck(fraudData, currencyData) {
   /* Program layout
 
@@ -146,7 +148,6 @@ function fraudeCheck(fraudData, currencyData) {
 
   const COUNTRIES_BY_CURRENCY = createLookupObject(currencyData, 'Code', listCountries);
 
-
   /* SCALES */
   const checkOneScale = d3.scaleLinear()
                           .domain([STANDARDDEVIATION_UPPER, TRANSACTION_MAX])
@@ -170,6 +171,11 @@ function fraudeCheck(fraudData, currencyData) {
 
   const checkSixScale = d3.scaleLinear()
                           .domain([1, 5])
+                          .rangeRound([0, 25])
+                          .clamp(true);
+
+  const checkSevenScale = d3.scaleLinear()
+                          .domain([0, 12])
                           .rangeRound([0, 25])
                           .clamp(true);
 
@@ -351,6 +357,24 @@ function fraudeCheck(fraudData, currencyData) {
 
   /* Fraud check #7 : 'Transaction time check' */
   // independent
+  function addTimedifference(transaction) {
+    const transactionDate = moment.utc(transaction.creationdate);
+    const mostSuspiciousTime = moment.utc([
+      transactionDate.year(),
+      transactionDate.month(),
+      (transactionDate.hours() > 11) // if its 12 o clock or later
+        ? transactionDate.date() + 1 // compare to midnight next day
+        : transactionDate.date(),    // else compare to midnight this day
+      0, // (PS: if you change this value the value 3 lines back should also change)
+    ]);
+    return {
+      timeDifferenceWithPeakFraudHour: Math.abs(transactionDate.diff(mostSuspiciousTime, 'hours')),
+    };
+  }
+
+  function checkSeven(transaction) {
+    return { checkSeven: checkSevenScale(12 - transaction.timeDifferenceWithPeakFraudHour) }
+  }
 
 
   /* Add aditional fraud info to transaction */
@@ -362,6 +386,7 @@ function fraudeCheck(fraudData, currencyData) {
         addPercentageDifference(transaction),
         addRepeatedTransactions(transaction),
         addCountryDifferences(transaction),
+        addTimedifference(transaction),
         transaction
       );
     });
@@ -380,29 +405,76 @@ function fraudeCheck(fraudData, currencyData) {
         checkFour(transaction),
         checkFive(transaction),
         checkSix(transaction),
+        checkSeven(transaction),
         transaction
       );
     });
   }
 
   const SCORED_DATA = givePoints(ENHANCED_DATA);
-  console.table(SCORED_DATA);
 
-  // /* extract country codes from data */
-  // function extractCountries(datas, key) {
-  //   let arr = [];
-  //   for (let transaction of datas) {
-  //     arr.push(transaction[key]);
-  //   }
-  //   return arr;
-  // }
-  //
-  // console.log(
-  //   extractCountries(SCORED_DATA, 'currencycode')
-  //     .concat(extractCountries(SCORED_DATA, 'currencycode'))
-  //     .sort()
-  //     .filter((item, pos, ary) => !pos || item != ary[pos - 1])
-  // );
+
+  /* Calculate total */
+  function calculateTotalPoints(scoredData) {
+    return scoredData.map(transaction => {
+      return Object.assign({},
+        {
+          total:
+            transaction.checkOne +
+            transaction.checkTwo +
+            transaction.checkThree +
+            transaction.checkFour +
+            transaction.checkFive +
+            transaction.checkSix +
+            transaction.checkSeven,
+        },
+        transaction
+      );
+    });
+  }
+
+  const TOTAL_DATA = calculateTotalPoints(SCORED_DATA);
+
+  /* Calculate data required for the radar chart */
+  function calculateMeanPoints(dataset, name) {
+    return [
+      { axis: 'Amount',    value: calculateMean(dataset.map(d => d.checkOne)), name: name    },
+      { axis: 'Email or card number',    value: calculateMean(dataset.map(d => d.checkTwo)), name: name    },
+      { axis: 'Shopper country risk',  value: calculateMean(dataset.map(d => d.checkThree)), name: name  },
+      { axis: 'Multiple countries associated with email/card',   value: calculateMean(dataset.map(d => d.checkFour)), name: name   },
+      { axis: 'Country difference',   value: calculateMean(dataset.map(d => d.checkFive)), name: name   },
+      { axis: 'Card number reused',    value: calculateMean(dataset.map(d => d.checkSix)), name: name    },
+      { axis: 'Transaction time',  value: calculateMean(dataset.map(d => d.checkSeven)), name: name  },
+    ];
+  }
+
+  const fraudStats = calculateMeanPoints(TOTAL_DATA.filter(item => item.total > FRAUD_THRESHOLD), 'fraud');
+  const legitStats = calculateMeanPoints(TOTAL_DATA.filter(item => item.total <= FRAUD_THRESHOLD), 'legit');
+  const totalStats = calculateMeanPoints(TOTAL_DATA, 'all');
+
+  // draw radar chart
+  const radarChartOptions = {
+    w: 543, //Width of the circle
+    h: 500, //Height of the circle
+    margin: {top: 117, right: 100, bottom: 100, left: 100},
+    labelFactor: 1.25, 	//How much farther than the radius of the outer circle should the labels be placed
+ 	  wrapWidth: 60, 		//The number of pixels after which a label needs to be given a new line
+ 	  opacityArea: 0.50, 	//The opacity of the area of the blob
+ 	  dotRadius: 3, 			//The size of the colored circles of each blog
+ 	  opacityCircles: 1, 	//The opacity of the circles of each blob
+ 	  strokeWidth: 2, 		//The width of the stroke around each blob
+    maxValue: 25,
+    levels: 5,
+    roundStrokes: true,
+    color: d3.scaleOrdinal().range(["#e74c3c", "#444"]),
+  };
+
+  //Call function to draw the Radar chart
+  RadarChart('.radarChart', [fraudStats, totalStats], radarChartOptions);
+
+  // Call function to draw horizontal bar chart
+  // drawHorizontalBarChart('.horizontalbarchart', TOTAL_DATA);
+  drawBarChart('.horizontalbarchart', TOTAL_DATA.sort((left, right) => right.total - left.total), FRAUD_THRESHOLD);
 
 
   /* Draw chart */

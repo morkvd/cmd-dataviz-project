@@ -1,5 +1,9 @@
 .bar {
-  fill: #6F257F;
+  fill: #e5e5e5;
+
+  &.is-fraud {
+    fill: #e74c3c;
+  }
 }
 .axis path,
 .axis line {
@@ -20,4 +24,24 @@
   border: 1px solid #6F257F;
   padding: 14px;
   text-align: center;
+}
+
+text {
+  font-family: $font-stack-body;
+}
+
+.enter {
+  fill: rgba(0, 0, 0, .4);
+}
+
+.update {
+  fill: #333;
+}
+
+.tooltip {
+  background: $color-white;
+}
+
+.tooltip__text {
+
 }
